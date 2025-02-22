@@ -127,8 +127,28 @@ void cuda_test()
 	}
 }
 
+void org_cuda()
+{
+	//定义使用cuda
+	auto device = torch::Device(torch::kCUDA, 0);
+	//读取图片
+	auto image = cv::imread("M:\\fd\\ECAPA_DTNN_VPT\\pyfftcomf\\flower.jpg");
+	//缩放至指定大小
+	cv::resize(image, image, cv::Size(224, 224));
+	//转成张量
+	auto input_tensor = torch::from_blob(image.data, { image.rows, image.cols, 3 }, torch::kByte).permute({ 2, 0, 1 }).unsqueeze(0).to(torch::kFloat32) / 225.0;
+	//加载模型
+	auto model = torch::jit::load("M:\\fd\\ECAPA_DTNN_VPT\\pyfftcomf\\resnet34.pt");
+	model.to(device);
+	model.eval();
+	//前向传播
+	auto output = model.forward({ input_tensor.to(device) }).toTensor();
+	output = torch::softmax(output, 1);
+	std::cout << "模型预测结果为第" << torch::argmax(output) << "类，置信度为" << output.max() << std::endl;;
+}
+
 int main()
 {
-	cuda_test();
+	org_cuda();
 	return 0;
 }
