@@ -134,12 +134,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AttentiveStatsPool.cpp" />
+    <ClCompile Include="Conv1dReluBn.cpp" />
+    <ClCompile Include="ECAPA_TDNN.cpp" />
     <ClCompile Include="librosatest.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Res2Conv1dReluBn.cpp" />
+    <ClCompile Include="SE_Connect.cpp" />
+    <ClCompile Include="SE_Res2Block.cpp" />
     <ClCompile Include="test.cpp" />
+    <ClCompile Include="VPT_Mfcc.cpp" />
     <ClCompile Include="wavreader.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AttentiveStatsPool.h" />
+    <ClInclude Include="Conv1dReluBn.h" />
+    <ClInclude Include="ECAPA_TDNN.h" />
+    <ClInclude Include="Res2Conv1dReluBn.h" />
+    <ClInclude Include="SE_Connect.h" />
+    <ClInclude Include="SE_Res2Block.h" />
+    <ClInclude Include="VPT_Mfcc.h" />
     <ClInclude Include="wavreader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

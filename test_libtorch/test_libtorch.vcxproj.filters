@@ -27,9 +27,51 @@
     <ClCompile Include="wavreader.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="VPT_Mfcc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Res2Conv1dReluBn.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Conv1dReluBn.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SE_Connect.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SE_Res2Block.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AttentiveStatsPool.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ECAPA_TDNN.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="wavreader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="VPT_Mfcc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Res2Conv1dReluBn.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Conv1dReluBn.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SE_Connect.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SE_Res2Block.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="AttentiveStatsPool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ECAPA_TDNN.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
