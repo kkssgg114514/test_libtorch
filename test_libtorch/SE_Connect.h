@@ -1,7 +1,7 @@
 #pragma once
 #include <torch/torch.h>
 
-class SE_Connect
+class SE_Connect : public torch::nn::Module
 {
 public:
 	SE_Connect(int64_t channels, int64_t s = 2);

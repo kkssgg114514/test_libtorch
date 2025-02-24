@@ -1,7 +1,7 @@
 #pragma once
 #include <torch/torch.h>
 
-class AttentiveStatsPool
+class AttentiveStatsPool : public torch::nn::Module
 {
 public:
 	AttentiveStatsPool(int64_t in_dim, int64_t bottleneck_dim);

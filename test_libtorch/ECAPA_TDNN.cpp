@@ -2,25 +2,25 @@
 
 ECAPA_TDNN::ECAPA_TDNN(int64_t in_channels, int64_t channels, int64_t embd_dim)
 {
-	layer1 = register_module("layer1", std::make_shared<Conv1dReluBn>(
+	layer1 = this->register_module("layer1", std::make_shared<Conv1dReluBn>(
 		in_channels, channels, 5, 1, 2));
 
-	layer2 = register_module("layer2", std::make_shared<SE_Res2Block>(
+	layer2 = this->register_module("layer2", std::make_shared<SE_Res2Block>(
 		channels, 3, 1, 2, 2, 8));
 
-	layer3 = register_module("layer3", std::make_shared<SE_Res2Block>(
+	layer3 = this->register_module("layer3", std::make_shared<SE_Res2Block>(
 		channels, 3, 1, 3, 3, 8));
 
-	layer4 = register_module("layer4", std::make_shared<SE_Res2Block>(
+	layer4 = this->register_module("layer4", std::make_shared<SE_Res2Block>(
 		channels, 3, 1, 4, 4, 8));
 
-	conv = register_module("conv", torch::nn::Conv1d(
+	conv = this->register_module("conv", torch::nn::Conv1d(
 		torch::nn::Conv1dOptions(channels * 3, 1536, 1)));
 
-	pooling = register_module("pooling", std::make_shared<AttentiveStatsPool>(1536, 128));
-	bn1 = register_module("bn1", torch::nn::BatchNorm1d(3072));
-	linear = register_module("linear", torch::nn::Linear(3072, embd_dim));
-	bn2 = register_module("bn2", torch::nn::BatchNorm1d(embd_dim));
+	pooling = this->register_module("pooling", std::make_shared<AttentiveStatsPool>(1536, 128));
+	bn1 = this->register_module("bn1", torch::nn::BatchNorm1d(3072));
+	linear = this->register_module("linear", torch::nn::Linear(3072, embd_dim));
+	bn2 = this->register_module("bn2", torch::nn::BatchNorm1d(embd_dim));
 }
 
 torch::Tensor ECAPA_TDNN::forward(torch::Tensor x)
