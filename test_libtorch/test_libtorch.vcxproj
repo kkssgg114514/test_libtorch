@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)..\..\dependency\libtorch\include\torch\csrc\api\include;$(SolutionDir)..\..\dependency\libtorch\include;$(SolutionDir)..\..\dependency\opencv\opencv\build\include;$(SolutionDir)..\..\dependency\LibrosaCpp-main;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\..\dependency\libtorch\lib;$(SolutionDir)..\..\dependency\opencv\opencv\build\x64\vc16\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\..\dependency\libtorch\include\torch\csrc\api\include;$(SolutionDir)..\..\dependency\libtorch\include;$(SolutionDir)..\..\dependency\opencv\build\include;$(SolutionDir)..\..\dependency\LibrosaCpp-main;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\dependency\libtorch\lib;$(SolutionDir)..\..\dependency\opencv\build\x64\vc16\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
