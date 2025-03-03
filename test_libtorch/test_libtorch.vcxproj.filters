@@ -13,17 +13,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\tests">
+      <UniqueIdentifier>{8c9709d9-6035-4295-a92a-cff67e681b80}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="test.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="librosatest.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="wavreader.c">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -46,6 +40,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ECAPA_TDNN.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="librosatest.cpp">
+      <Filter>源文件\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test.cpp">
+      <Filter>源文件\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
