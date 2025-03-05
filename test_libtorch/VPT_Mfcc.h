@@ -6,8 +6,20 @@ class VPT_Mfcc
 {
 public:
 	//使用时仅需输入文件名
-	void extractMfccFeatures(std::string url);
+	void extractMfccFeatures(
+		std::string url,	//文件路径
+		int frame_length,	//帧长度
+		int frame_space		//帧间隔
+		);
 
+	//保存文件
+	void saveMfccFeatures(const std::string& output_path);
+
+	//批量处理文件函数
+	void processBatchMfccFeatures(const std::string& input_dir, const std::string& output_dir);
+
+	//读取对应的特征文件函数
+	void loadMfccFeatures(const std::string& input_path);
 
 private:
 
@@ -15,7 +27,7 @@ private:
 	int format; 
 	//声道数量
 	int channels;
-	//频率
+	//频率(采样率)
 	int sr;
 	//每个采样的位数
 	int bits_per_sample;

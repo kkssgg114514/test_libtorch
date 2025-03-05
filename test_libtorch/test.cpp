@@ -176,7 +176,7 @@ void org_cuda()
 //	return 0;
 //}
 
-//#include "Filesearch.h"
+#include "Filesearch.h"
 //
 //int main()
 //{
@@ -187,3 +187,19 @@ void org_cuda()
 //		std::cout << i << std::endl;
 //	}
 //}
+
+#include "VPT_Mfcc.h"
+
+int main()
+{
+	VPT_Mfcc mfcc_processor;
+
+	// 输入目录和输出目录
+	std::string input_dir = "D:/private/fd/data_aishell/wav";
+	std::string output_dir = "D:/private/fd/testfeature";
+
+	// 批量处理
+	mfcc_processor.processBatchMfccFeatures(input_dir, output_dir);
+
+	return 0;
+}
