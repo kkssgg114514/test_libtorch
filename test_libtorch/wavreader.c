@@ -170,7 +170,18 @@ void wav_read_close(void* obj) {
 }
 
 int wav_get_header(void* obj, int* format, int* channels, int* sample_rate, int* bits_per_sample, unsigned int* data_length) {
+	if (obj == NULL) {
+		fprintf(stderr, "wav_get_header: 传入的对象为空\n");
+		return 0;
+	}
 	struct wav_reader* wr = (struct wav_reader*) obj;
+
+	if (wr->sample_rate <= 0 || wr->channels <= 0 || wr->bits_per_sample <= 0) {
+		fprintf(stderr, "WAV文件头信息异常: 采样率=%d, 通道数=%d, 采样位数=%d\n",
+			wr->sample_rate, wr->channels, wr->bits_per_sample);
+		return 0;
+	}
+
 	if (format)
 		*format = wr->format;
 	if (channels)
