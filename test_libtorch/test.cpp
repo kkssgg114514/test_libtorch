@@ -22,6 +22,8 @@
 #include <opencv2/opencv.hpp>
 #include <torch/torch.h>
 #include <torch/script.h>
+#include <vector>
+#include <string>
 
 void cpu_test()
 {
@@ -172,4 +174,16 @@ void org_cuda()
 //{
 //	cuda_test();
 //	return 0;
+//}
+
+//#include "Filesearch.h"
+//
+//int main()
+//{
+//	std::vector<std::string> testf = Filesearch::getAllFiles("D:/private/fd/data_aishell/wav");
+//
+//	for (auto i : testf)
+//	{
+//		std::cout << i << std::endl;
+//	}
 //}

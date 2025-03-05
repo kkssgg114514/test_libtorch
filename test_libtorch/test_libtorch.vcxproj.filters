@@ -51,6 +51,9 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Filesearch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="wavreader.h">
@@ -75,6 +78,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ECAPA_TDNN.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Filesearch.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
