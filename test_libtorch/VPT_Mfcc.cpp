@@ -25,6 +25,11 @@ void VPT_Mfcc::extractMfccFeatures(std::string url, int frame_length, int frame_
 	}
 	//计算样本个数
 	samples = data_length * 8 / bits_per_sample;
+	if (samples < sr)
+	{
+		std::cout << url << std::endl;
+		return;
+	}
 	//将样本从整型数组存储转到浮点型数组(原本是void)
 	std::vector<int16_t> tmp(samples);
 	res = wav_read_data(h_x, reinterpret_cast<unsigned char*>(tmp.data()), data_length);
@@ -33,6 +38,7 @@ void VPT_Mfcc::extractMfccFeatures(std::string url, int frame_length, int frame_
 		std::cerr << "read wav file error: " << res << std::endl;
 		return;
 	}
+	wav_read_close(h_x);
 	std::vector<float> x(samples);
 	std::transform(tmp.begin(), tmp.end(), x.begin(),
 				   [] (int16_t a)
