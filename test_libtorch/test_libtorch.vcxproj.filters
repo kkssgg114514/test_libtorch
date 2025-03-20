@@ -54,6 +54,9 @@
     <ClCompile Include="Filesearch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="SpeakerDataSet.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="wavreader.h">
@@ -81,6 +84,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Filesearch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SpeakerDataSet.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

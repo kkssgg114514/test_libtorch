@@ -143,6 +143,7 @@
     <ClCompile Include="Res2Conv1dReluBn.cpp" />
     <ClCompile Include="SE_Connect.cpp" />
     <ClCompile Include="SE_Res2Block.cpp" />
+    <ClCompile Include="SpeakerDataSet.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="VPT_Mfcc.cpp" />
     <ClCompile Include="wavreader.c" />
@@ -155,6 +156,7 @@
     <ClInclude Include="Res2Conv1dReluBn.h" />
     <ClInclude Include="SE_Connect.h" />
     <ClInclude Include="SE_Res2Block.h" />
+    <ClInclude Include="SpeakerDataSet.h" />
     <ClInclude Include="VPT_Mfcc.h" />
     <ClInclude Include="wavreader.h" />
   </ItemGroup>
