@@ -188,18 +188,39 @@ void org_cuda()
 //	}
 //}
 
-#include "VPT_Mfcc.h"
+#include "SpeakerDataSet.h"
+#include "AAMSoftmaxLoss.h"
+
+//int main()
+//{
+//	VPT_Mfcc mfcc_processor;
+//
+//	//// 输入目录和输出目录
+//	//std::string input_dir = "D:/private/fd/data_aishell/wav";
+//	//std::string output_dir = "D:/private/fd/testfeature";
+//
+//	//// 批量处理
+//	//mfcc_processor.processBatchMfccFeatures(input_dir, output_dir);
+//
+//	/*mfcc_processor.loadMfccFeatures("D:/private/fd/testfeature/S0002/train/S0002/BAC009S0002W0122.feature");
+//
+//	std::vector<std::vector<float>> feature_sample = mfcc_processor.getFeature();
+//
+//	for (auto& i : feature_sample)
+//	{
+//		for (auto& j : i)
+//		{
+//			std::cout << j << " ";
+//		}
+//		std::cout << std::endl;
+//	}*/
+//
+//	return 0;
+//}
+
 
 int main()
 {
-	VPT_Mfcc mfcc_processor;
-
-	// 输入目录和输出目录
-	std::string input_dir = "D:/private/fd/data_aishell/wav";
-	std::string output_dir = "D:/private/fd/testfeature";
-
-	// 批量处理
-	mfcc_processor.processBatchMfccFeatures(input_dir, output_dir);
 
 	return 0;
 }

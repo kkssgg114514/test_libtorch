@@ -1,35 +1,34 @@
 #pragma once
 #include <torch/torch.h>
-
+#include "VPT_Mfcc.h"
 
 struct SpeakerSample {
     torch::Tensor features;  // MFCC特征 [seq_len, 80]
     int64_t speaker_id;      // 说话人ID
 };
 
-class SpeakerDataSet : public torch::data::Dataset<SpeakerDataSet>
+class SpeakerDataSet
 {
 private:
-    struct SpeakerData
-    {
-        std::string feature_path;
-        int64_t speaker_id;
-    };
-
-    std::vector<SpeakerData> samples;
-    int feature_dim;
-    int chunk_size;
-    bool is_train;
+    VPT_Mfcc mfcc_processer;
 
 public:
-    SpeakerDataSet(const std::string& feature_dir, int feature_dim = 80,
-        int chunk_size = 200, bool is_train = true);
+    //将wav数据大批量转化为feature数据,也可以实现小批量
+    //该函数会递归搜索输入目录下的所有wav文件
+    void processBatchMfccFeatures(const std::string& input_dir, const std::string& output_dir);
 
-    //获取说话人数量
-    int64_t num_speakers() const;
+    //提取特征文件,保存为样本(单)
+    SpeakerSample loadFeatureFile(const std::string& input_path, int64_t id);
 
-    torch::optional<size_t> size() const override;
+    //从目录文件读取数据
+    void load_feature_paths(const std::string& path_file);
 
-    SpeakerSample get(size_t index) override;
+private:
+    //提取的feature转换为tensor
+    torch::Tensor vectorToTensor(std::vector<std::vector<float>> feature_sample);
+
+
+    std::vector<std::string> feature_paths;
+    std::vector<int> speaker_ids;
 };
 

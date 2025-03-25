@@ -168,3 +168,8 @@ void VPT_Mfcc::loadMfccFeatures(const std::string& input_path)
 
 	in_file.close();
 }
+
+std::vector<std::vector<float>> VPT_Mfcc::getFeature() const
+{
+	return mfcc_features;
+}

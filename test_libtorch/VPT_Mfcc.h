@@ -21,6 +21,8 @@ public:
 	//读取对应的特征文件函数
 	void loadMfccFeatures(const std::string& input_path);
 
+	std::vector<std::vector<float>> getFeature() const;
+
 private:
 
 	//文件头包含的信息

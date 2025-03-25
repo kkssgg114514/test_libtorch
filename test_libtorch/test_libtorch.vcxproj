@@ -134,6 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AAMSoftmaxLoss.cpp" />
     <ClCompile Include="AttentiveStatsPool.cpp" />
     <ClCompile Include="Conv1dReluBn.cpp" />
     <ClCompile Include="ECAPA_TDNN.cpp" />
@@ -149,6 +150,7 @@
     <ClCompile Include="wavreader.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AAMSoftmaxLoss.h" />
     <ClInclude Include="AttentiveStatsPool.h" />
     <ClInclude Include="Conv1dReluBn.h" />
     <ClInclude Include="ECAPA_TDNN.h" />
