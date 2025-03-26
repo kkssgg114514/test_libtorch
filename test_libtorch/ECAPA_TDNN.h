@@ -10,6 +10,8 @@ public:
 
 	torch::Tensor forward(torch::Tensor x);
 
+	//±£´æÄ£ÐÍ
+	void save_speaker_model(int speaker_id, const std::string& save_path);
 private:
 	std::shared_ptr<Conv1dReluBn> layer1;
 	std::shared_ptr<SE_Res2Block> layer2;

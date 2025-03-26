@@ -1,6 +1,10 @@
 #include "SpeakerDataSet.h"
+#include "ECAPA_TDNN.h"
 #include <iostream>
 #include <fstream>
+#include <algorithm>
+#include "SpeakerVerificationLoss.h"
+#include <random>
 
 void SpeakerDataSet::processBatchMfccFeatures(const std::string& input_dir, const std::string& output_dir)
 {
@@ -33,6 +37,100 @@ void SpeakerDataSet::load_feature_paths(const std::string& path_file)
 	}
 }
 
+void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
+{
+    // 按说话人ID分组特征
+    std::unordered_map<int, std::vector<torch::Tensor>> speaker_features;
+    for (size_t i = 0; i < feature_paths.size(); ++i) {
+        // 加载特征并标准化
+        SpeakerSample feature = loadFeatureFile(feature_paths[i], speaker_ids[i]);
+        feature.features = normalize_feature(feature.features);
+        speaker_features[speaker_ids[i]].push_back(feature.features);
+    }
+
+    std::random_device rd;
+    std::mt19937 g(rd());
+
+    // 为每个说话人训练模型
+    for (const auto& [speaker_id, features] : speaker_features) {
+        // 创建模型
+        auto model = std::make_shared<ECAPA_TDNN>();
+        torch::optim::Adam optimizer(
+            model->parameters(),
+            torch::optim::AdamOptions(1e-3)
+        );
+
+        // 创建损失函数
+        SpeakerVerificationLoss verification_loss;
+
+        // 训练参数
+        int epochs = 100;
+        int batch_size = 8;
+
+        for (int epoch = 0; epoch < epochs; ++epoch) {
+            float total_loss = 0.0;
+
+            // 随机打乱特征
+            //std::shuffle(features.begin(), features.end(), g);
+
+            // 分批次训练
+            for (size_t batch_start = 0; batch_start < features.size(); batch_start += batch_size) {
+                // 准备批次数据
+                std::vector<torch::Tensor> batch_features(
+                    features.begin() + batch_start,
+                    features.begin() + std::min(batch_start + batch_size, features.size())
+                );
+
+                // 生成嵌入
+                std::vector<torch::Tensor> embeddings;
+                for (auto& feat : batch_features) {
+                    embeddings.push_back(model->forward(feat.unsqueeze(0)));
+                }
+
+                // 构建正负样本
+                torch::Tensor anchor = embeddings[0];
+                torch::Tensor positives = torch::stack(
+                    std::vector<torch::Tensor>(
+                        embeddings.begin() + 1,
+                        embeddings.end()
+                    )
+                );
+
+                // 从其他说话人获取负样本
+                torch::Tensor negatives = sample_negatives(speaker_features, speaker_id);
+
+                // 计算损失
+                optimizer.zero_grad();
+                torch::Tensor loss = verification_loss.forward(anchor, positives, negatives);
+                loss.backward();
+                optimizer.step();
+
+                total_loss += loss.item<float>();
+            }
+            int p_speaker_id = speaker_id;
+            float lossAvg = total_loss / (features.size() / batch_size);
+            // 打印每轮损失
+            if (epoch % 10 == 0) {
+                std::cout << "Speaker " << p_speaker_id << ", Epoch " << epoch << ", Avg Loss: " << lossAvg << std::endl;
+            }
+        }
+
+        // 保存模型
+        std::string model_path = output_dir + "/speaker_" + std::to_string(speaker_id) + "_model.pt";
+        torch::save(model, model_path);
+    }
+}
+
+std::vector<std::string> SpeakerDataSet::getFeaturePath() const
+{
+    return feature_paths;
+}
+
+std::vector<int> SpeakerDataSet::getSpeakerId() const
+{
+    return speaker_ids;
+}
+
 torch::Tensor SpeakerDataSet::vectorToTensor(std::vector<std::vector<float>> feature_sample)
 {
 	size_t rows = feature_sample.size();
@@ -50,4 +148,37 @@ torch::Tensor SpeakerDataSet::vectorToTensor(std::vector<std::vector<float>> fea
 	}
 
 	return tensor;
+}
+
+torch::Tensor SpeakerDataSet::sample_negatives(const std::unordered_map<int, std::vector<torch::Tensor>>& all_features, int current_speaker_id, int num_negatives)
+{
+    std::vector<torch::Tensor> negative_samples;
+
+    std::random_device rd;
+    std::mt19937 g(rd());
+
+    // 收集所有非当前说话人的特征
+    std::vector<torch::Tensor> other_features;
+    for (const auto& [speaker_id, features] : all_features) {
+        if (speaker_id != current_speaker_id) {
+            other_features.insert(
+                other_features.end(),
+                features.begin(),
+                features.end()
+            );
+        }
+    }
+
+    // 随机采样
+    //std::shuffle(other_features.begin(), other_features.end(), g);
+    for (int i = 0; i < std::min(num_negatives, (int)other_features.size()); ++i) {
+        negative_samples.push_back(other_features[i]);
+    }
+
+    return torch::stack(negative_samples);
+}
+
+torch::Tensor SpeakerDataSet::normalize_feature(torch::Tensor feature)
+{
+    return (feature - feature.mean()) / feature.std();
 }

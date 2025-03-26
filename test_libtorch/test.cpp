@@ -1,5 +1,5 @@
 //#include <opencv2/opencv.hpp>
-//#include <iostream>
+#include <iostream>
 //
 //int main()
 //{
@@ -189,7 +189,6 @@ void org_cuda()
 //}
 
 #include "SpeakerDataSet.h"
-#include "AAMSoftmaxLoss.h"
 
 //int main()
 //{
@@ -221,6 +220,17 @@ void org_cuda()
 
 int main()
 {
+	SpeakerDataSet test;
+	test.load_feature_paths("D:\\private\\fd\\filedir.txt");
+
+	std::vector<std::string> featurePath = test.getFeaturePath();
+	std::vector<int> speakerId = test.getSpeakerId();
+
+	for (auto& i : featurePath)
+	{
+		std::cout << i << std::endl;
+	}
+
 
 	return 0;
 }
