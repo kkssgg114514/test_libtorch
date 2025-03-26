@@ -44,7 +44,7 @@ def generate_feature_paths(root_dir, output_file):
 
 
 def main():
-    generate_feature_paths("D:/private/fd/testfeature", "D:/private/fd/filedir.txt")
+    generate_feature_paths("M:/fd/testfeature", "M:/fd/filedir.txt")
 
 
 if __name__ == '__main__':
