@@ -221,7 +221,7 @@
 int main()
 {
 	SpeakerDataSet test;
-	test.load_feature_paths("M:\\fd\\filedir.txt");
+	test.load_feature_paths("D:\\private\\fd\\testfea.txt");
 
 	std::vector<std::string> featurePath = test.getFeaturePath();
 	std::vector<int> speakerId = test.getSpeakerId();
@@ -230,7 +230,8 @@ int main()
 	{
 		std::cout << i << std::endl;
 	}
-
+	std::string modelURL = "D:\\private\\fd\\Model_test";
+	test.train_speaker_models(modelURL);
 
 	return 0;
 }

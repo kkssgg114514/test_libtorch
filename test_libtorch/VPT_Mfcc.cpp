@@ -156,6 +156,12 @@ void VPT_Mfcc::loadMfccFeatures(const std::string& input_path)
 	in_file.read(reinterpret_cast<char*>(&rows), sizeof(size_t));
 	in_file.read(reinterpret_cast<char*>(&cols), sizeof(size_t));
 
+	if (rows == 0 || cols == 0)
+	{
+		std::cout << "该文件" << input_path << "为空" << std::endl;
+		return;
+	}
+
 	// 清空并调整mfcc_features大小
 	mfcc_features.clear();
 	mfcc_features.resize(rows, std::vector<float>(cols));

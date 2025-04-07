@@ -42,10 +42,21 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 {
 	// 按说话人ID分组特征
 	std::unordered_map<int, std::vector<torch::Tensor>> speaker_features;
+
+	int preid = 0;
+	int k = 0;
+
 	for (size_t i = 0; i < feature_paths.size(); ++i)
 	{
-// 加载特征并标准化
+		if (preid != speaker_ids[i])
+		{
+			preid = speaker_ids[i];
+			k = 0;
+		}
+		k++;
+		// 加载特征并标准化
 		SpeakerSample feature = loadFeatureFile(feature_paths[i], speaker_ids[i]);
+		std::cout << "Speaker id:" << speaker_ids[i] << " 第" << k << "个特征文件" << std::endl;
 		feature.features = normalize_feature(feature.features);
 		speaker_features[speaker_ids[i]].push_back(feature.features);
 	}
@@ -56,7 +67,7 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 	// 为每个说话人训练模型
 	for (const auto& [speaker_id, features] : speaker_features)
 	{
-// 创建模型
+		// 创建模型
 		auto model = std::make_shared<ECAPA_TDNN>();
 		torch::optim::Adam optimizer(
 			model->parameters(),
@@ -145,9 +156,9 @@ torch::Tensor SpeakerDataSet::vectorToTensor(std::vector<std::vector<float>> fea
 
 	// 创建一个Tensor内存区域
 	torch::Tensor tensor = torch::zeros({ static_cast<long>(rows), static_cast<long>(cols) },
-										torch::TensorOptions().dtype(torch::kFloat32));
+		torch::TensorOptions().dtype(torch::kFloat32));
 
-									// 复制数据
+	// 复制数据
 	for (size_t i = 0; i < rows; i++)
 	{
 		for (size_t j = 0; j < cols; j++)
