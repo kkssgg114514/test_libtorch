@@ -101,7 +101,7 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 				std::vector<torch::Tensor> embeddings;
 				for (auto& feat : batch_features)
 				{
-					embeddings.push_back(model->forward(feat.unsqueeze(0)));
+					embeddings.push_back(model->forward(feat.unsqueeze(0).expand({ 2, -1, -1 })));
 				}
 
 				// 构建正负样本

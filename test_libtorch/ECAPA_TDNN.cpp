@@ -25,14 +25,21 @@ ECAPA_TDNN::ECAPA_TDNN(int64_t in_channels, int64_t channels, int64_t embd_dim)
 
 torch::Tensor ECAPA_TDNN::forward(torch::Tensor x)
 {
+	//std::cout << x.sizes() << std::endl;
 	x = x.transpose(1, 2);
 	auto out1 = layer1->forward(x);
 	auto out2 = layer2->forward(out1) + out1;
 	auto out3 = layer3->forward(out1 + out2) + out1 + out2;
 	auto out4 = layer4->forward(out1 + out2 + out3) + out1 + out2 + out3;
+	//std::cout << out1.sizes() << std::endl;
+	//std::cout << out2.sizes() << std::endl;
+	//std::cout << out3.sizes() << std::endl;
+	//std::cout << out4.sizes() << std::endl;
 
 	auto out = torch::cat({ out2, out3, out4 }, 1);
+	//std::cout << out.sizes() << std::endl;
 	out = torch::relu(conv->forward(out));
+	//大概率输入维度不符合要求,理应符合要求?(已修复)
 	out = bn1->forward(pooling->forward(out));
 	out = bn2->forward(linear->forward(out));
 	return out;
