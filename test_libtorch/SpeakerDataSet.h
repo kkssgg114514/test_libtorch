@@ -35,7 +35,7 @@ private:
     torch::Tensor vectorToTensor(std::vector<std::vector<float>> feature_sample);
 
     //提取负样本
-    torch::Tensor sample_negatives(
+    std::vector<torch::Tensor> sample_negatives(
         const std::unordered_map<int, std::vector<torch::Tensor>>& all_features,
         int current_speaker_id,
         int num_negatives = 5

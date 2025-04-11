@@ -114,11 +114,20 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 				);
 
 				// 从其他说话人获取负样本
-				torch::Tensor negatives = sample_negatives(speaker_features, speaker_id);
+				std::vector<torch::Tensor> negatives = sample_negatives(speaker_features, speaker_id);
+
+				std::vector<torch::Tensor> neFeatures;
+
+				for (auto& negative : negatives)
+				{
+					neFeatures.push_back(model->forward(negative.unsqueeze(0).expand({ 2, -1, -1 })));
+				}
+
+				torch::Tensor negativesStack = torch::stack(neFeatures);
 
 				// 计算损失
 				optimizer.zero_grad();
-				torch::Tensor loss = verification_loss.forward(anchor, positives, negatives);
+				torch::Tensor loss = verification_loss.forward(anchor, positives, negativesStack);
 				loss.backward();
 				optimizer.step();
 
@@ -170,7 +179,7 @@ torch::Tensor SpeakerDataSet::vectorToTensor(std::vector<std::vector<float>> fea
 	return tensor;
 }
 
-torch::Tensor SpeakerDataSet::sample_negatives(const std::unordered_map<int, std::vector<torch::Tensor>>& all_features, int current_speaker_id, int num_negatives)
+std::vector<torch::Tensor> SpeakerDataSet::sample_negatives(const std::unordered_map<int, std::vector<torch::Tensor>>& all_features, int current_speaker_id, int num_negatives)
 {
 	std::vector<torch::Tensor> negative_samples;
 
@@ -192,13 +201,13 @@ torch::Tensor SpeakerDataSet::sample_negatives(const std::unordered_map<int, std
 	}
 
 	// 随机采样
-	//std::shuffle(other_features.begin(), other_features.end(), g);
+	std::shuffle(other_features.begin(), other_features.end(), g);
 	for (int i = 0; i < std::min(num_negatives, (int)other_features.size()); ++i)
 	{
 		negative_samples.push_back(other_features[i]);
 	}
-
-	return torch::stack(negative_samples);
+	
+	return negative_samples;
 }
 
 torch::Tensor SpeakerDataSet::normalize_feature(torch::Tensor feature)
