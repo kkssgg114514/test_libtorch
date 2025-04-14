@@ -64,11 +64,20 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 	std::random_device rd;
 	std::mt19937 g(rd());
 
+	// 检查 CUDA 是否可用
+	torch::Device device(torch::kCUDA);
+	if (!torch::cuda::is_available()) {
+		std::cout << "CUDA is not available, using CPU instead." << std::endl;
+		device = torch::Device(torch::kCPU);
+	}
+
 	// 为每个说话人训练模型
 	for (const auto& [speaker_id, features] : speaker_features)
 	{
 		// 创建模型
 		auto model = std::make_shared<ECAPA_TDNN>();
+		model->to(device); // 将模型移动到 GPU 上
+
 		torch::optim::Adam optimizer(
 			model->parameters(),
 			torch::optim::AdamOptions(1e-3)
@@ -85,6 +94,9 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 		{
 			float total_loss = 0.0;
 
+			// 输出当前学习率
+			float lr = optimizer.param_groups()[0].options().get_lr();
+			std::cout << "Speaker " << speaker_id << ", Epoch " << epoch << ", Learning Rate: " << lr << std::endl;
 			// 随机打乱特征
 			//std::shuffle(features.begin(), features.end(), g);
 
@@ -96,6 +108,11 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 					features.begin() + batch_start,
 					features.begin() + std::min(batch_start + batch_size, features.size())
 				);
+
+				// 将批次数据移动到 GPU 上
+				for (auto& feat : batch_features) {
+					feat = feat.to(device);
+				}
 
 				// 生成嵌入
 				std::vector<torch::Tensor> embeddings;
@@ -114,12 +131,13 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 				);
 
 				// 从其他说话人获取负样本
-				std::vector<torch::Tensor> negatives = sample_negatives(speaker_features, speaker_id);
+				std::vector<torch::Tensor> negatives = sample_negatives(speaker_features, speaker_id, embeddings.size() - 1);
 
 				std::vector<torch::Tensor> neFeatures;
 
 				for (auto& negative : negatives)
 				{
+					negative = negative.to(device);
 					neFeatures.push_back(model->forward(negative.unsqueeze(0).expand({ 2, -1, -1 })));
 				}
 
@@ -131,8 +149,28 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 				loss.backward();
 				optimizer.step();
 
-				total_loss += loss.item<float>();
+				total_loss += loss.detach().item<float>();
+
+				// 输出批次损失
+				//std::cout << "Speaker " << speaker_id << ", Epoch " << epoch << ", Batch " << batch_start / batch_size << ", Loss: " << loss.item<float>() << std::endl;
+
 			}
+
+			// 计算梯度范数
+			torch::Tensor grad_norm = torch::zeros({ 1 }, torch::kFloat32).to(device);
+			for (const auto& param : model->parameters())
+			{
+				if (param.grad().defined())
+				{
+					grad_norm += param.grad().norm().pow(2);
+				}
+			}
+			grad_norm = grad_norm.sqrt();
+
+			// 输出梯度范数
+			std::cout << "Speaker " << speaker_id << ", Epoch " << epoch << ", Gradient Norm: " << grad_norm.item<float>() << std::endl;
+
+
 			int p_speaker_id = speaker_id;
 			float lossAvg = total_loss / (features.size() / batch_size);
 			// 打印每轮损失
@@ -202,7 +240,7 @@ std::vector<torch::Tensor> SpeakerDataSet::sample_negatives(const std::unordered
 
 	// 随机采样
 	std::shuffle(other_features.begin(), other_features.end(), g);
-	for (int i = 0; i < std::min(num_negatives, (int)other_features.size()); ++i)
+	for (int i = 0; i < num_negatives; ++i)
 	{
 		negative_samples.push_back(other_features[i]);
 	}

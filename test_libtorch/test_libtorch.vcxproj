@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)..\..\dependency\libtorch\include\torch\csrc\api\include;$(SolutionDir)..\..\dependency\libtorch\include;$(SolutionDir)..\..\dependency\opencv\build\include;$(SolutionDir)..\..\dependency\LibrosaCpp-main;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\..\dependency\libtorch\lib;$(SolutionDir)..\..\dependency\opencv\build\x64\vc16\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\..\dependency\libtorch\include\torch\csrc\api\include;$(SolutionDir)..\..\dependency\libtorch\include;$(SolutionDir)..\..\dependency\LibrosaCpp-main;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\dependency\libtorch\lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\include;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -119,7 +119,7 @@
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;NOMINMAX;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -129,7 +129,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <AdditionalDependencies>opencv_world4100.lib;asmjit.lib;c10.lib;c10_cuda.lib;caffe2_nvrtc.lib;cpuinfo.lib;dnnl.lib;fbgemm.lib;fmt.lib;kineto.lib;libprotobuf-lite.lib;libprotobuf.lib;libprotoc.lib;microkernels-prod.lib;pthreadpool.lib;sleef.lib;torch.lib;torch_cpu.lib;torch_cuda.lib;XNNPACK.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>asmjit.lib;c10.lib;c10_cuda.lib;caffe2_nvrtc.lib;cpuinfo.lib;dnnl.lib;fbgemm.lib;fmt.lib;kineto.lib;libprotobuf-lite.lib;libprotobuf.lib;libprotoc.lib;microkernels-prod.lib;pthreadpool.lib;sleef.lib;torch.lib;torch_cpu.lib;torch_cuda.lib;XNNPACK.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/INCLUDE:?warp_size@cuda@at@@YAHXZ %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
