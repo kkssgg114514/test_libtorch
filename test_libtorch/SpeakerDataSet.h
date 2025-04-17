@@ -26,6 +26,9 @@ public:
     //训练说话人模型
     void train_speaker_models(const std::string& output_dir);
 
+    //模型测试
+	void test_speaker_models(const std::string& model_dir, const std::string& test_path);
+
     std::vector<std::string> getFeaturePath() const;
 
     std::vector<int> getSpeakerId() const;

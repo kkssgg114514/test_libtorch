@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "SpeakerVerificationLoss.h"
 #include <random>
+#include <filesystem>
 
 void SpeakerDataSet::processBatchMfccFeatures(const std::string& input_dir, const std::string& output_dir)
 {
@@ -184,6 +185,56 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 		std::string model_path = output_dir + "/speaker_" + std::to_string(speaker_id) + "_model.pt";
 		torch::save(model, model_path);
 	}
+}
+
+void SpeakerDataSet::test_speaker_models(const std::string& model_dir, const std::string& test_path)
+{
+	// 检查 CUDA 是否可用
+	torch::Device device(torch::kCUDA);
+	if (!torch::cuda::is_available()) {
+		std::cout << "CUDA is not available, using CPU instead." << std::endl;
+		device = torch::Device(torch::kCPU);
+	}
+	// 加载测试特征
+	SpeakerSample test_sample = loadFeatureFile(test_path, 0);
+	test_sample.features = normalize_feature(test_sample.features);
+	test_sample.features = test_sample.features.to(device);
+	// 生成嵌入
+	torch::Tensor embedding;
+
+	// 遍历模型目录，加载所有模型
+	std::vector<SpeakerSample> speaker_embeddings;
+	for (const auto& entry : std::filesystem::directory_iterator(model_dir)) {
+		std::string model_path = entry.path().string();
+
+		// 加载模型
+		auto model = std::make_shared<ECAPA_TDNN>();
+		torch::load(model, model_path);
+		model->to(device);
+		model->eval();
+
+		// 生成嵌入
+		torch::Tensor speaker_embedding = model->forward(test_sample.features.unsqueeze(0).expand({ 2, -1, -1 }));
+		int speaker_id = extract_speaker_id_from_path(model_path); // 自定义函数提取说话人ID
+		speaker_embeddings.speaker_id = speaker_embedding;
+	}
+	// 计算与每个说话人模型的相似度
+	// 计算与每个说话人模型的相似度
+	std::vector<std::pair<int, float>> similarities;
+	for (const auto& [speaker_id, speaker_embedding] : speaker_embeddings) {
+		float similarity = torch::cosine_similarity(test_embedding, speaker_embedding).item<float>();
+		similarities.emplace_back(speaker_id, similarity);
+	}
+	// 找到最相似的说话人
+	auto max_similarity = std::max_element(similarities.begin(), similarities.end(),
+		[](const auto& a, const auto& b) { return a.second < b.second; });
+	// 输出预测结果
+	std::cout << "Predicted speaker ID: " << max_similarity->first
+		<< ", Similarity: " << max_similarity->second << std::endl;
+	// 释放模型
+	model.reset();
+	// 释放测试样本
+	test_sample.features.reset();
 }
 
 std::vector<std::string> SpeakerDataSet::getFeaturePath() const
