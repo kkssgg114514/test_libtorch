@@ -207,6 +207,8 @@ void SpeakerDataSet::test_speaker_models(const std::string& model_dir, const std
 	for (const auto& entry : std::filesystem::directory_iterator(model_dir)) {
 		std::string model_path = entry.path().string();
 
+		SpeakerSample speaker_embedding1;
+
 		// 加载模型
 		auto model = std::make_shared<ECAPA_TDNN>();
 		torch::load(model, model_path);
@@ -216,13 +218,24 @@ void SpeakerDataSet::test_speaker_models(const std::string& model_dir, const std
 		// 生成嵌入
 		torch::Tensor speaker_embedding = model->forward(test_sample.features.unsqueeze(0).expand({ 2, -1, -1 }));
 		int speaker_id = extract_speaker_id_from_path(model_path); // 自定义函数提取说话人ID
-		speaker_embeddings.speaker_id = speaker_embedding;
+		speaker_embedding1.features = speaker_embedding;
+		speaker_embedding1.speaker_id = speaker_id;
+		speaker_embeddings.push_back(speaker_embedding1);
 	}
-	// 计算与每个说话人模型的相似度
+	//使用原始模型处理测试特征
+	auto model = std::make_shared<ECAPA_TDNN>();
+	model->to(device); // 将模型移动到 GPU 上
+	model->eval();
+
+	SpeakerSample test_speaker;
+	test_speaker.features = model->forward(test_sample.features.unsqueeze(0).expand({ 2, -1, -1 }));
+	test_speaker.speaker_id = 0;
+
+
 	// 计算与每个说话人模型的相似度
 	std::vector<std::pair<int, float>> similarities;
-	for (const auto& [speaker_id, speaker_embedding] : speaker_embeddings) {
-		float similarity = torch::cosine_similarity(test_embedding, speaker_embedding).item<float>();
+	for (const auto& [speaker_embedding, speaker_id] : speaker_embeddings) {
+		float similarity = torch::cosine_similarity(test_speaker.features, speaker_embedding).item<float>();
 		similarities.emplace_back(speaker_id, similarity);
 	}
 	// 找到最相似的说话人
@@ -297,6 +310,30 @@ std::vector<torch::Tensor> SpeakerDataSet::sample_negatives(const std::unordered
 	}
 	
 	return negative_samples;
+}
+
+int SpeakerDataSet::extract_speaker_id_from_path(const std::string& model_path)
+{
+	size_t firstUnderscore = model_path.find('_');
+	if (firstUnderscore == std::string::npos) {
+		return -1; // 没找到第一个下划线
+	}
+	size_t secondUnderscore = model_path.find('_', firstUnderscore + 1);
+	if (secondUnderscore == std::string::npos) {
+		return -1; // 没找到第二个下划线
+	}
+	std::string numberStr = model_path.substr(firstUnderscore + 1, secondUnderscore - firstUnderscore - 1);
+	try {
+		return std::stoi(numberStr);
+	}
+	catch (const std::invalid_argument& e) {
+		std::cerr << "转换数字时出错: " << e.what() << std::endl;
+		return -1;
+	}
+	catch (const std::out_of_range& e) {
+		std::cerr << "数字超出范围: " << e.what() << std::endl;
+		return -1;
+	}
 }
 
 torch::Tensor SpeakerDataSet::normalize_feature(torch::Tensor feature)

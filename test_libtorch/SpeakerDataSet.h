@@ -44,6 +44,9 @@ private:
         int num_negatives = 5
     );
 
+    // 提取说话人ID,从模型名称
+    int extract_speaker_id_from_path(const std::string& model_path);
+
     //向量标准化
     torch::Tensor normalize_feature(torch::Tensor feature);
 
