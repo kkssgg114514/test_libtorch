@@ -139,6 +139,7 @@
     <ClCompile Include="Conv1dReluBn.cpp" />
     <ClCompile Include="dll.cpp" />
     <ClCompile Include="ECAPA_TDNN.cpp" />
+    <ClCompile Include="export.cpp" />
     <ClCompile Include="Filesearch.cpp" />
     <ClCompile Include="librosatest.cpp" />
     <ClCompile Include="main.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="Conv1dReluBn.h" />
     <ClInclude Include="dll.h" />
     <ClInclude Include="ECAPA_TDNN.h" />
+    <ClInclude Include="export.h" />
     <ClInclude Include="Filesearch.h" />
     <ClInclude Include="Res2Conv1dReluBn.h" />
     <ClInclude Include="SE_Connect.h" />

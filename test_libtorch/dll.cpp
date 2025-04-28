@@ -1,5 +1,5 @@
-//dll.cpp
-extern "C" _declspec(dllexport)void start()
-{
-
-}
+////dll.cpp
+//extern "C" _declspec(dllexport)void start()
+//{
+//
+//}

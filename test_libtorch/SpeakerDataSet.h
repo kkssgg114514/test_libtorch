@@ -17,6 +17,9 @@ public:
     //该函数会递归搜索输入目录下的所有wav文件
     void processBatchMfccFeatures(const std::string& input_dir, const std::string& output_dir);
 
+    //某个音频文件转变为feature
+    std::string processMfccFeatures(const std::string wavPath, const std::string& output_dir);
+
     //提取特征文件,保存为样本(单)
     SpeakerSample loadFeatureFile(const std::string& input_path, int64_t id);
 
@@ -27,7 +30,7 @@ public:
     void train_speaker_models(const std::string& output_dir);
 
     //模型测试
-	void test_speaker_models(const std::string& model_dir, const std::string& test_path);
+    int test_speaker_models(const std::string& model_dir, const std::string& test_path);
 
     std::vector<std::string> getFeaturePath() const;
 

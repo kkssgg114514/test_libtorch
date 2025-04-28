@@ -216,22 +216,44 @@
 //
 //	return 0;
 //}
+//
+//
+//int main()
+//{
+//	SpeakerDataSet test;
+//	test.load_feature_paths("D:\\private\\fd\\testfea.txt");
+//
+//	std::vector<std::string> featurePath = test.getFeaturePath();
+//	std::vector<int> speakerId = test.getSpeakerId();
+//
+//	for (auto& i : featurePath)
+//	{
+//		std::cout << i << std::endl;
+//	}
+//	std::string modelURL = "D:\\private\\fd\\Model_test";
+//	test.train_speaker_models(modelURL);
+//
+//	return 0;
+//}
 
+#include "export.h"
 
 int main()
 {
-	SpeakerDataSet test;
-	test.load_feature_paths("D:\\private\\fd\\testfea.txt");
 
-	std::vector<std::string> featurePath = test.getFeaturePath();
-	std::vector<int> speakerId = test.getSpeakerId();
+	////指定音频文件夹路径和编号
+	//std::string train1 = "D:\\private\\fd\\testnew\\trainDir\\speaker1";
+	//std::string train2 = "D:\\private\\fd\\testnew\\trainDir\\speaker2";
+	//std::string train3 = "D:\\private\\fd\\testnew\\trainDir\\speaker3";
 
-	for (auto& i : featurePath)
-	{
-		std::cout << i << std::endl;
-	}
-	std::string modelURL = "D:\\private\\fd\\Model_test";
-	test.train_speaker_models(modelURL);
+	//trainModel(train1, 1);
+	//trainModel(train2, 2);
+	//trainModel(train3, 3);
+
+	std::string test1 = "D:\\private\\fd\\testnew\\testDir\\test2\\BAC009S0008W0185.wav";
+	int user = testModel(test1);
+
+	std::cout << user << std::endl;
 
 	return 0;
 }

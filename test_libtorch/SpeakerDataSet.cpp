@@ -12,6 +12,25 @@ void SpeakerDataSet::processBatchMfccFeatures(const std::string& input_dir, cons
 	mfcc_processer.processBatchMfccFeatures(input_dir, output_dir);
 }
 
+std::string SpeakerDataSet::processMfccFeatures(const std::string wavPath, const std::string& output_dir)
+{
+	mfcc_processer.extractMfccFeatures(wavPath, 25, 10);
+
+	// 构建相对路径
+	std::filesystem::path input_path(wavPath);
+
+	// 构建对应的输出路径
+	std::filesystem::path output_path =
+		std::filesystem::path(output_dir) /
+		(input_path.stem().string() + ".feature");
+
+	// 确保输出目录存在
+	std::filesystem::create_directories(output_path.parent_path());
+	// 保存特征
+	mfcc_processer.saveMfccFeatures(output_path.string());
+	return output_path.string();
+}
+
 SpeakerSample SpeakerDataSet::loadFeatureFile(const std::string& input_path, int64_t id)
 {
 	SpeakerSample res;
@@ -41,6 +60,30 @@ void SpeakerDataSet::load_feature_paths(const std::string& path_file)
 
 void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 {
+
+	//// 设置默认张量类型为双精度浮点型
+	//torch::TensorOptions options = torch::TensorOptions().dtype(torch::kDouble);
+	//torch::set_default_dtype(options.dtype());
+
+	/*torch::Device global_device(torch::kCUDA);
+	torch::TensorOptions global_options = torch::TensorOptions().device(global_device);
+	torch::set_default_dtype(global_options.dtype());
+	torch::set_default_device(global_device);*/
+
+	// 确保输出目录存在
+	namespace fs = std::filesystem;
+	if (!fs::exists(output_dir)) {
+		try {
+			fs::create_directories(output_dir);
+			std::cout << "Created output directory: " << output_dir << std::endl;
+		}
+		catch (const fs::filesystem_error& e) {
+			std::cerr << "Error creating directory: " << e.what() << std::endl;
+			std::cerr << "Cannot proceed without valid output directory" << std::endl;
+			return;
+		}
+	}
+
 	// 按说话人ID分组特征
 	std::unordered_map<int, std::vector<torch::Tensor>> speaker_features;
 
@@ -66,11 +109,11 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 	std::mt19937 g(rd());
 
 	// 检查 CUDA 是否可用
-	torch::Device device(torch::kCUDA);
-	if (!torch::cuda::is_available()) {
+	torch::Device device(torch::kCPU);
+	/*if (!torch::cuda::is_available()) {
 		std::cout << "CUDA is not available, using CPU instead." << std::endl;
 		device = torch::Device(torch::kCPU);
-	}
+	}*/
 
 	// 为每个说话人训练模型
 	for (const auto& [speaker_id, features] : speaker_features)
@@ -84,8 +127,9 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 			torch::optim::AdamOptions(1e-3)
 		);
 
-		// 创建损失函数
-		SpeakerVerificationLoss verification_loss;
+		// 创建损失函数 - 修改为不需要负样本的损失函数
+		// 这里应该使用一个适合单个说话人特征的损失函数，例如MSE或交叉熵
+		torch::nn::MSELoss mse_loss;
 
 		// 训练参数
 		int epochs = 100;
@@ -98,8 +142,6 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 			// 输出当前学习率
 			float lr = optimizer.param_groups()[0].options().get_lr();
 			std::cout << "Speaker " << speaker_id << ", Epoch " << epoch << ", Learning Rate: " << lr << std::endl;
-			// 随机打乱特征
-			//std::shuffle(features.begin(), features.end(), g);
 
 			// 分批次训练
 			for (size_t batch_start = 0; batch_start < features.size(); batch_start += batch_size)
@@ -122,39 +164,31 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 					embeddings.push_back(model->forward(feat.unsqueeze(0).expand({ 2, -1, -1 })));
 				}
 
-				// 构建正负样本
+				if (embeddings.size() <= 1) {
+					continue; // 跳过只有一个样本的批次
+				}
+
+				// 构建自监督学习任务：预测同一说话人的其他特征
 				torch::Tensor anchor = embeddings[0];
-				torch::Tensor positives = torch::stack(
+				torch::Tensor target = torch::stack(
 					std::vector<torch::Tensor>(
 						embeddings.begin() + 1,
 						embeddings.end()
 					)
 				);
 
-				// 从其他说话人获取负样本
-				std::vector<torch::Tensor> negatives = sample_negatives(speaker_features, speaker_id, embeddings.size() - 1);
-
-				std::vector<torch::Tensor> neFeatures;
-
-				for (auto& negative : negatives)
-				{
-					negative = negative.to(device);
-					neFeatures.push_back(model->forward(negative.unsqueeze(0).expand({ 2, -1, -1 })));
-				}
-
-				torch::Tensor negativesStack = torch::stack(neFeatures);
-
-				// 计算损失
+				// 计算损失 - 使用均方误差或其他适合的损失函数
+				// 这里假设我们希望同一说话人的不同特征产生相似的嵌入表示
 				optimizer.zero_grad();
-				torch::Tensor loss = verification_loss.forward(anchor, positives, negativesStack);
+
+				// 计算锚嵌入与所有其他嵌入之间的距离
+				torch::Tensor expanded_anchor = anchor.expand_as(target);
+				torch::Tensor loss = mse_loss(expanded_anchor, target);
+
 				loss.backward();
 				optimizer.step();
 
 				total_loss += loss.detach().item<float>();
-
-				// 输出批次损失
-				//std::cout << "Speaker " << speaker_id << ", Epoch " << epoch << ", Batch " << batch_start / batch_size << ", Loss: " << loss.item<float>() << std::endl;
-
 			}
 
 			// 计算梯度范数
@@ -171,7 +205,6 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 			// 输出梯度范数
 			std::cout << "Speaker " << speaker_id << ", Epoch " << epoch << ", Gradient Norm: " << grad_norm.item<float>() << std::endl;
 
-
 			int p_speaker_id = speaker_id;
 			float lossAvg = total_loss / (features.size() / batch_size);
 			// 打印每轮损失
@@ -186,15 +219,14 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 		torch::save(model, model_path);
 	}
 }
-
-void SpeakerDataSet::test_speaker_models(const std::string& model_dir, const std::string& test_path)
+int SpeakerDataSet::test_speaker_models(const std::string& model_dir, const std::string& test_path)
 {
 	// 检查 CUDA 是否可用
-	torch::Device device(torch::kCUDA);
-	if (!torch::cuda::is_available()) {
+	torch::Device device(torch::kCPU);
+	/*if (!torch::cuda::is_available()) {
 		std::cout << "CUDA is not available, using CPU instead." << std::endl;
 		device = torch::Device(torch::kCPU);
-	}
+	}*/
 	// 加载测试特征
 	SpeakerSample test_sample = loadFeatureFile(test_path, 0);
 	test_sample.features = normalize_feature(test_sample.features);
@@ -235,19 +267,20 @@ void SpeakerDataSet::test_speaker_models(const std::string& model_dir, const std
 	// 计算与每个说话人模型的相似度
 	std::vector<std::pair<int, float>> similarities;
 	for (const auto& [speaker_embedding, speaker_id] : speaker_embeddings) {
-		float similarity = torch::cosine_similarity(test_speaker.features, speaker_embedding).item<float>();
+		/*std::cout << test_speaker.features.sizes() << std::endl;
+		std::cout << speaker_embedding.sizes() << std::endl;*/
+		float similarity = torch::cosine_similarity(test_speaker.features, speaker_embedding).mean().item<float>();
 		similarities.emplace_back(speaker_id, similarity);
 	}
 	// 找到最相似的说话人
 	auto max_similarity = std::max_element(similarities.begin(), similarities.end(),
 		[](const auto& a, const auto& b) { return a.second < b.second; });
-	// 输出预测结果
-	std::cout << "Predicted speaker ID: " << max_similarity->first
-		<< ", Similarity: " << max_similarity->second << std::endl;
 	// 释放模型
 	model.reset();
 	// 释放测试样本
 	test_sample.features.reset();
+
+	return max_similarity->first;
 }
 
 std::vector<std::string> SpeakerDataSet::getFeaturePath() const

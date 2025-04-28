@@ -66,6 +66,9 @@
     <ClCompile Include="dll.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="export.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="wavreader.h">
@@ -105,6 +108,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="dll.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="export.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
