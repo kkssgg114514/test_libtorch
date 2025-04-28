@@ -63,6 +63,9 @@
     <ClCompile Include="SpeakerVerificationLoss.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="dll.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="wavreader.h">
@@ -99,6 +102,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="SpeakerVerificationLoss.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dll.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

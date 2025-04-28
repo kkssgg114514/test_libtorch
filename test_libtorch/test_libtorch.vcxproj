@@ -137,6 +137,7 @@
     <ClCompile Include="AAMSoftmaxLoss.cpp" />
     <ClCompile Include="AttentiveStatsPool.cpp" />
     <ClCompile Include="Conv1dReluBn.cpp" />
+    <ClCompile Include="dll.cpp" />
     <ClCompile Include="ECAPA_TDNN.cpp" />
     <ClCompile Include="Filesearch.cpp" />
     <ClCompile Include="librosatest.cpp" />
@@ -154,6 +155,7 @@
     <ClInclude Include="AAMSoftmaxLoss.h" />
     <ClInclude Include="AttentiveStatsPool.h" />
     <ClInclude Include="Conv1dReluBn.h" />
+    <ClInclude Include="dll.h" />
     <ClInclude Include="ECAPA_TDNN.h" />
     <ClInclude Include="Filesearch.h" />
     <ClInclude Include="Res2Conv1dReluBn.h" />
