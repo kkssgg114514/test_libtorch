@@ -233,14 +233,18 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 int SpeakerDataSet::test_speaker_models(const std::string& model_dir, const std::string& test_path)
 {
 	// 检查 CUDA 是否可用
-	torch::Device device = torch::cuda::is_available() ? torch::kCUDA : torch::kCPU;
-	std::cout << "Using device: " << (device.is_cuda() ? "CUDA" : "CPU") << std::endl;
+	torch::Device device(torch::kCPU);
+	if (!torch::cuda::is_available()) {
+		std::cout << "CUDA is not available, using CPU instead." << std::endl;
+		device = torch::Device(torch::kCPU);
+	}
 
 	// 加载测试特征
 	SpeakerSample test_sample = loadFeatureFile(test_path, 0);
+	
 	test_sample.features = normalize_feature(test_sample.features);
 	test_sample.features = test_sample.features.to(device);
-
+	//std::cout << test_sample.features << std::endl;
 	// 遍历模型目录，加载所有模型和对应的参考嵌入
 	std::vector<std::pair<int, float>> similarities;
 
@@ -281,6 +285,8 @@ int SpeakerDataSet::test_speaker_models(const std::string& model_dir, const std:
 			torch::Tensor test_embedding = speaker_model->forward(
 				test_sample.features.unsqueeze(0).expand({ 2, -1, -1 })
 			);
+			//std::cout << test_embedding << std::endl;
+			//std::cout << reference_embedding << std::endl;
 
 			// 计算余弦相似度
 			float similarity = torch::cosine_similarity(
