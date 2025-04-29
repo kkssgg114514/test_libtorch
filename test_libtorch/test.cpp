@@ -240,20 +240,24 @@
 
 int main()
 {
+	//指定音频文件夹路径和编号
+	std::string train1 = "D:\\private\\fd\\testnew\\trainDir\\speaker1";
+	std::string train2 = "D:\\private\\fd\\testnew\\trainDir\\speaker2";
+	std::string train3 = "D:\\private\\fd\\testnew\\trainDir\\speaker3";
 
-	////指定音频文件夹路径和编号
-	//std::string train1 = "D:\\private\\fd\\testnew\\trainDir\\speaker1";
-	//std::string train2 = "D:\\private\\fd\\testnew\\trainDir\\speaker2";
-	//std::string train3 = "D:\\private\\fd\\testnew\\trainDir\\speaker3";
+	trainModel(train1, 1);
+	trainModel(train2, 2);
+	trainModel(train3, 3);
 
-	//trainModel(train1, 1);
-	//trainModel(train2, 2);
-	//trainModel(train3, 3);
+	//std::string test1 = "D:\\private\\fd\\testnew\\testDir\\test2\\BAC009S0008W0185.wav"; //2
+	//std::string test2 = "D:\\private\\fd\\testnew\\testDir\\test3\\BAC009S0089W0175.wav"; //3
+	//std::string test3 = "D:\\private\\fd\\testnew\\testDir\\test1\\BAC009S0002W0383.wav"; //1
+	//std::string test4 = "D:\\private\\fd\\testnew\\testDir\\test3\\BAC009S0089W0173.wav"; //3
+	//for (int i = 0; i < 100; i++)
+	//{
+	//	int user = testModel(test1);
 
-	std::string test1 = "D:\\private\\fd\\testnew\\testDir\\test2\\BAC009S0008W0185.wav";
-	int user = testModel(test1);
-
-	std::cout << user << std::endl;
-
+	//	std::cout << user << std::endl;
+	//}
 	return 0;
 }

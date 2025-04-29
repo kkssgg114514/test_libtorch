@@ -61,14 +61,12 @@ void SpeakerDataSet::load_feature_paths(const std::string& path_file)
 void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 {
 
-	//// 设置默认张量类型为双精度浮点型
-	//torch::TensorOptions options = torch::TensorOptions().dtype(torch::kDouble);
-	//torch::set_default_dtype(options.dtype());
-
-	/*torch::Device global_device(torch::kCUDA);
-	torch::TensorOptions global_options = torch::TensorOptions().device(global_device);
-	torch::set_default_dtype(global_options.dtype());
-	torch::set_default_device(global_device);*/
+	// 检查 CUDA 是否可用
+	torch::Device device(torch::kCPU);
+	if (!torch::cuda::is_available()) {
+		std::cout << "CUDA is not available, using CPU instead." << std::endl;
+		device = torch::Device(torch::kCPU);
+	}
 
 	// 确保输出目录存在
 	namespace fs = std::filesystem;
@@ -102,18 +100,13 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 		SpeakerSample feature = loadFeatureFile(feature_paths[i], speaker_ids[i]);
 		std::cout << "Speaker id:" << speaker_ids[i] << " 第" << k << "个特征文件" << std::endl;
 		feature.features = normalize_feature(feature.features);
+		//装进GPU
+		feature.features = feature.features.to(device);
 		speaker_features[speaker_ids[i]].push_back(feature.features);
 	}
 
 	std::random_device rd;
 	std::mt19937 g(rd());
-
-	// 检查 CUDA 是否可用
-	torch::Device device(torch::kCPU);
-	/*if (!torch::cuda::is_available()) {
-		std::cout << "CUDA is not available, using CPU instead." << std::endl;
-		device = torch::Device(torch::kCPU);
-	}*/
 
 	// 为每个说话人训练模型
 	for (const auto& [speaker_id, features] : speaker_features)
@@ -124,25 +117,27 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 
 		torch::optim::Adam optimizer(
 			model->parameters(),
-			torch::optim::AdamOptions(1e-3)
+			torch::optim::AdamOptions(0.1)
 		);
 
 		// 创建损失函数 - 修改为不需要负样本的损失函数
 		// 这里应该使用一个适合单个说话人特征的损失函数，例如MSE或交叉熵
 		torch::nn::MSELoss mse_loss;
+		mse_loss->to(device);
 
 		// 训练参数
 		int epochs = 100;
 		int batch_size = 8;
-
+		std::vector<torch::Tensor> all_embeddings;
 		for (int epoch = 0; epoch < epochs; ++epoch)
 		{
 			float total_loss = 0.0;
+			model->train();
 
 			// 输出当前学习率
 			float lr = optimizer.param_groups()[0].options().get_lr();
 			std::cout << "Speaker " << speaker_id << ", Epoch " << epoch << ", Learning Rate: " << lr << std::endl;
-
+			
 			// 分批次训练
 			for (size_t batch_start = 0; batch_start < features.size(); batch_start += batch_size)
 			{
@@ -153,15 +148,22 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 				);
 
 				// 将批次数据移动到 GPU 上
-				for (auto& feat : batch_features) {
-					feat = feat.to(device);
+				for (auto& feat : batch_features)
+				{
+					if (feat.device() != device)
+					{
+						feat = feat.to(device);
+					}
 				}
 
 				// 生成嵌入
 				std::vector<torch::Tensor> embeddings;
 				for (auto& feat : batch_features)
 				{
-					embeddings.push_back(model->forward(feat.unsqueeze(0).expand({ 2, -1, -1 })));
+					auto input = feat.unsqueeze(0).expand({ 2, -1, -1 }).to(device);
+					auto emb = model->forward(input).to(device);
+					embeddings.push_back(emb);
+					all_embeddings.push_back(emb);
 				}
 
 				if (embeddings.size() <= 1) {
@@ -169,21 +171,21 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 				}
 
 				// 构建自监督学习任务：预测同一说话人的其他特征
-				torch::Tensor anchor = embeddings[0];
+				torch::Tensor anchor = embeddings[0].to(device);
 				torch::Tensor target = torch::stack(
 					std::vector<torch::Tensor>(
 						embeddings.begin() + 1,
 						embeddings.end()
 					)
-				);
+				).to(device);
 
 				// 计算损失 - 使用均方误差或其他适合的损失函数
 				// 这里假设我们希望同一说话人的不同特征产生相似的嵌入表示
 				optimizer.zero_grad();
 
 				// 计算锚嵌入与所有其他嵌入之间的距离
-				torch::Tensor expanded_anchor = anchor.expand_as(target);
-				torch::Tensor loss = mse_loss(expanded_anchor, target);
+				torch::Tensor expanded_anchor = anchor.expand_as(target).to(device);
+				torch::Tensor loss = mse_loss(expanded_anchor, target).to(device);
 
 				loss.backward();
 				optimizer.step();
@@ -212,73 +214,103 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 			{
 				std::cout << "Speaker " << p_speaker_id << ", Epoch " << epoch << ", Avg Loss: " << lossAvg << std::endl;
 			}
+			
 		}
+
+		// 计算平均嵌入作为参考
+		torch::Tensor reference_embedding = torch::stack(all_embeddings).mean(0);
 
 		// 保存模型
 		std::string model_path = output_dir + "/speaker_" + std::to_string(speaker_id) + "_model.pt";
 		torch::save(model, model_path);
+
+		// 保存参考嵌入
+		std::string embedding_path = output_dir + "/speaker_" + std::to_string(speaker_id) + "_embedding.pt";
+		torch::save(reference_embedding, embedding_path);
 	}
 }
+
 int SpeakerDataSet::test_speaker_models(const std::string& model_dir, const std::string& test_path)
 {
 	// 检查 CUDA 是否可用
-	torch::Device device(torch::kCPU);
-	/*if (!torch::cuda::is_available()) {
-		std::cout << "CUDA is not available, using CPU instead." << std::endl;
-		device = torch::Device(torch::kCPU);
-	}*/
+	torch::Device device = torch::cuda::is_available() ? torch::kCUDA : torch::kCPU;
+	std::cout << "Using device: " << (device.is_cuda() ? "CUDA" : "CPU") << std::endl;
+
 	// 加载测试特征
 	SpeakerSample test_sample = loadFeatureFile(test_path, 0);
 	test_sample.features = normalize_feature(test_sample.features);
 	test_sample.features = test_sample.features.to(device);
-	// 生成嵌入
-	torch::Tensor embedding;
 
-	// 遍历模型目录，加载所有模型
-	std::vector<SpeakerSample> speaker_embeddings;
-	for (const auto& entry : std::filesystem::directory_iterator(model_dir)) {
-		std::string model_path = entry.path().string();
-
-		SpeakerSample speaker_embedding1;
-
-		// 加载模型
-		auto model = std::make_shared<ECAPA_TDNN>();
-		torch::load(model, model_path);
-		model->to(device);
-		model->eval();
-
-		// 生成嵌入
-		torch::Tensor speaker_embedding = model->forward(test_sample.features.unsqueeze(0).expand({ 2, -1, -1 }));
-		int speaker_id = extract_speaker_id_from_path(model_path); // 自定义函数提取说话人ID
-		speaker_embedding1.features = speaker_embedding;
-		speaker_embedding1.speaker_id = speaker_id;
-		speaker_embeddings.push_back(speaker_embedding1);
-	}
-	//使用原始模型处理测试特征
-	auto model = std::make_shared<ECAPA_TDNN>();
-	model->to(device); // 将模型移动到 GPU 上
-	model->eval();
-
-	SpeakerSample test_speaker;
-	test_speaker.features = model->forward(test_sample.features.unsqueeze(0).expand({ 2, -1, -1 }));
-	test_speaker.speaker_id = 0;
-
-
-	// 计算与每个说话人模型的相似度
+	// 遍历模型目录，加载所有模型和对应的参考嵌入
 	std::vector<std::pair<int, float>> similarities;
-	for (const auto& [speaker_embedding, speaker_id] : speaker_embeddings) {
-		/*std::cout << test_speaker.features.sizes() << std::endl;
-		std::cout << speaker_embedding.sizes() << std::endl;*/
-		float similarity = torch::cosine_similarity(test_speaker.features, speaker_embedding).mean().item<float>();
-		similarities.emplace_back(speaker_id, similarity);
+
+	for (const auto& entry : std::filesystem::directory_iterator(model_dir)) {
+		std::string file_path = entry.path().string();
+
+		// 只处理模型文件
+		if (file_path.find("_model.pt") == std::string::npos) {
+			continue;
+		}
+
+		std::string model_path = file_path;
+		int speaker_id = extract_speaker_id_from_path(model_path);
+
+		// 构造对应的嵌入文件路径
+		std::string embedding_path = model_dir + "/speaker_" + std::to_string(speaker_id) + "_embedding.pt";
+
+		// 确认嵌入文件存在
+		if (!std::filesystem::exists(embedding_path)) {
+			std::cerr << "Warning: Reference embedding not found for speaker " << speaker_id << std::endl;
+			continue;
+		}
+
+		try {
+			// 加载特定说话人的模型
+			auto speaker_model = std::make_shared<ECAPA_TDNN>();
+			torch::load(speaker_model, model_path);
+			speaker_model->to(device);
+			speaker_model->eval();
+
+			// 加载参考嵌入
+			torch::Tensor reference_embedding;
+			torch::load(reference_embedding, embedding_path);
+			reference_embedding = reference_embedding.to(device);
+
+			// 使用此说话人模型处理测试特征
+			torch::NoGradGuard no_grad; // 禁用梯度计算提高效率
+			torch::Tensor test_embedding = speaker_model->forward(
+				test_sample.features.unsqueeze(0).expand({ 2, -1, -1 })
+			);
+
+			// 计算余弦相似度
+			float similarity = torch::cosine_similarity(
+				test_embedding,
+				reference_embedding
+			).mean().item<float>();
+
+			similarities.emplace_back(speaker_id, similarity);
+			std::cout << "Speaker " << speaker_id << " similarity: " << similarity << std::endl;
+		}
+		catch (const std::exception& e) {
+			std::cerr << "Error processing speaker " << speaker_id << ": " << e.what() << std::endl;
+			continue;
+		}
 	}
+
 	// 找到最相似的说话人
-	auto max_similarity = std::max_element(similarities.begin(), similarities.end(),
-		[](const auto& a, const auto& b) { return a.second < b.second; });
-	// 释放模型
-	model.reset();
-	// 释放测试样本
-	test_sample.features.reset();
+	if (similarities.empty()) {
+		std::cerr << "No valid similarities calculated!" << std::endl;
+		return -1;
+	}
+
+	auto max_similarity = std::max_element(
+		similarities.begin(),
+		similarities.end(),
+		[](const auto& a, const auto& b) { return a.second < b.second; }
+	);
+
+	std::cout << "Best match: Speaker " << max_similarity->first
+		<< " with similarity " << max_similarity->second << std::endl;
 
 	return max_similarity->first;
 }
@@ -341,7 +373,7 @@ std::vector<torch::Tensor> SpeakerDataSet::sample_negatives(const std::unordered
 	{
 		negative_samples.push_back(other_features[i]);
 	}
-	
+
 	return negative_samples;
 }
 
