@@ -256,9 +256,13 @@ int main()
 	std::string test3 = "D:\\private\\fd\\testnew\\testDir\\test1\\BAC009S0002W0383.wav"; //1
 	std::string test4 = "D:\\private\\fd\\testnew\\testDir\\test3\\BAC009S0089W0173.wav"; //3
 	std::string test5 = "D:\\private\\fd\\testnew\\testDir\\test4\\BAC009S0132W0210.wav"; //4
-	int user = testModel(test5);
+	std::string test6 = "D:\\private\\fd\\testnew\\testDir\\test1\\BAC0001.wav"; //1
+	int user = testModel(test4);
 
 	std::cout << user << std::endl;
+
+	/*std::string trainDir = "D:\\private\\fd\\testnew\\trainDir";
+	trainModel2(trainDir);*/
 
 	return 0;
 }

@@ -43,8 +43,10 @@ std::vector<std::string> Filesearch::getAllFiles(const std::string& url)
 
 void Filesearch::generate_feature_paths(const std::string& root_dir, const std::string& output_file, int speaker_id)
 {
-	std::ofstream outfile(output_file, std::ios::out | std::ios::trunc);
-
+	// 根据 speaker_id 决定文件打开模式
+	std::ios_base::openmode mode = (speaker_id == 1) ? (std::ios::out | std::ios::trunc) : (std::ios::out | std::ios::app);
+	// 打开文件
+	std::ofstream outfile(output_file, mode);
 	if (!outfile.is_open()) {
 		std::cerr << "Error: Could not open output file: " << output_file << std::endl;
 		return;
