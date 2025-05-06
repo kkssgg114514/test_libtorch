@@ -128,7 +128,7 @@ void SpeakerDataSet::train_speaker_models_3(const std::string& output_dir)
 	torch::nn::MSELoss mse_loss;
 
 	// 训练参数
-	int epochs = 10;
+	int epochs = 15;
 	int batch_size = 8;
 
 	// 开始训练
