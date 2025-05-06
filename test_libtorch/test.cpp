@@ -257,12 +257,16 @@ int main()
 	//std::string test4 = "D:\\private\\fd\\testnew\\testDir\\test3\\BAC009S0089W0173.wav"; //3xx
 	//std::string test5 = "D:\\private\\fd\\testnew\\testDir\\test4\\BAC009S0132W0210.wav"; //4vx
 	//std::string test6 = "D:\\private\\fd\\testnew\\testDir\\test1\\BAC0001.wav"; //1vv
-	//int user = testModel(test6);
 
-	//std::cout << user << std::endl;
+	std::string test11 = "D:\\code\\fdHelp\\testnew\\testDir\\test1\\BAC0001.wav"; //1vv
+	std::string test12 = "D:\\code\\fdHelp\\testnew\\testDir\\test2\\BAC009S0008W0184.wav"; //2vv
 
-	std::string trainDir = "D:\\private\\fd\\testnew\\trainDir";
-	trainModel2(trainDir);
+	int user = testModel(test12);
+
+	std::cout << user << std::endl;
+
+	/*std::string trainDir = "D:\\code\\fdHelp\\testnew\\trainDir";
+	trainModel2(trainDir);*/
 
 	return 0;
 }

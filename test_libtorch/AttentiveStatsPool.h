@@ -12,4 +12,3 @@ private:
 	torch::nn::Conv1d linear1 { nullptr };
 	torch::nn::Conv1d linear2 { nullptr };
 };
-

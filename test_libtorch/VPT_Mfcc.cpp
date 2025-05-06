@@ -72,7 +72,8 @@ void VPT_Mfcc::saveMfccFeatures(const std::string& output_path)
 {
 	// 使用二进制写入模式保存特征
 	std::ofstream out_file(output_path, std::ios::binary);
-	if (!out_file) {
+	if (!out_file)
+	{
 		std::cerr << "无法创建特征文件: " << output_path << std::endl;
 		return;
 	}
@@ -82,7 +83,8 @@ void VPT_Mfcc::saveMfccFeatures(const std::string& output_path)
 	out_file.write(reinterpret_cast<char*>(&rows), sizeof(size_t));
 
 	// 如果特征为空，直接返回
-	if (rows == 0) {
+	if (rows == 0)
+	{
 		out_file.close();
 		return;
 	}
@@ -92,9 +94,10 @@ void VPT_Mfcc::saveMfccFeatures(const std::string& output_path)
 	out_file.write(reinterpret_cast<char*>(&cols), sizeof(size_t));
 
 	// 逐行写入特征数据
-	for (const auto& feature_vector : mfcc_features) {
+	for (const auto& feature_vector : mfcc_features)
+	{
 		out_file.write(reinterpret_cast<const char*>(feature_vector.data()),
-			feature_vector.size() * sizeof(float));
+					   feature_vector.size() * sizeof(float));
 	}
 
 	out_file.close();
@@ -108,9 +111,11 @@ void VPT_Mfcc::processBatchMfccFeatures(const std::string& input_dir, const std:
 	// 查找所有WAV文件
 	auto wav_files = Filesearch::getAllFiles(input_dir);
 
-	for (const auto& wav_file : wav_files) {
-		try {
-			// 重置特征矩阵
+	for (const auto& wav_file : wav_files)
+	{
+		try
+		{
+	   // 重置特征矩阵
 			mfcc_features.clear();
 
 			// 提取特征
@@ -136,7 +141,8 @@ void VPT_Mfcc::processBatchMfccFeatures(const std::string& input_dir, const std:
 			std::cout << "处理成功: " << input_path.filename()
 				<< " -> " << output_path.filename() << std::endl;
 		}
-		catch (const std::exception& e) {
+		catch (const std::exception& e)
+		{
 			std::cerr << "处理文件时发生错误: " << wav_file
 				<< ", 错误信息: " << e.what() << std::endl;
 		}
@@ -146,7 +152,8 @@ void VPT_Mfcc::processBatchMfccFeatures(const std::string& input_dir, const std:
 void VPT_Mfcc::loadMfccFeatures(const std::string& input_path)
 {
 	std::ifstream in_file(input_path, std::ios::binary);
-	if (!in_file) {
+	if (!in_file)
+	{
 		std::cerr << "无法打开特征文件: " << input_path << std::endl;
 		return;
 	}
@@ -167,9 +174,10 @@ void VPT_Mfcc::loadMfccFeatures(const std::string& input_path)
 	mfcc_features.resize(rows, std::vector<float>(cols));
 
 	// 逐行读取特征数据
-	for (auto& feature_vector : mfcc_features) {
+	for (auto& feature_vector : mfcc_features)
+	{
 		in_file.read(reinterpret_cast<char*>(feature_vector.data()),
-			feature_vector.size() * sizeof(float));
+					 feature_vector.size() * sizeof(float));
 	}
 
 	in_file.close();

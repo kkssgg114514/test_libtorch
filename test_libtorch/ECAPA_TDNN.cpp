@@ -47,20 +47,22 @@ torch::Tensor ECAPA_TDNN::forward(torch::Tensor x)
 
 void ECAPA_TDNN::save_speaker_model(int speaker_id, const std::string& save_path)
 {
-		try {
+	try
+	{
 		torch::jit::script::Module jit_model;
 
 		// 直接加载模型参数
-		for (const auto& pair : this->named_parameters()) {
+		for (const auto& pair : this->named_parameters())
+		{
 			jit_model.register_parameter(pair.key(), pair.value(), false);
 		}
 
 		// 保存模型
 		jit_model.save(save_path);
 	}
-	catch (const c10::Error& e) {
+	catch (const c10::Error& e)
+	{
 		std::cerr << "Error saving the model: " << e.what() << std::endl;
-		return ;  // 返回
+		return;  // 返回
 	}
-
 }

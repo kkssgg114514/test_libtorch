@@ -12,4 +12,3 @@ private:
 	torch::nn::Linear linear1 { nullptr };
 	torch::nn::Linear linear2 { nullptr };
 };
-

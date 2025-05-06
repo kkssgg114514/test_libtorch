@@ -1,7 +1,6 @@
 #pragma once
 #include <torch/torch.h>
 
-
 class Res2Conv1dReluBn : public torch::nn::Module
 {
 public:

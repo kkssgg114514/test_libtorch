@@ -10,9 +10,9 @@ public:
 		std::string url,	//文件路径
 		int frame_length,	//帧长度
 		int frame_space		//帧间隔
-		);
+	);
 
-	//保存文件
+//保存文件
 	void saveMfccFeatures(const std::string& output_path);
 
 	//批量处理文件函数
@@ -26,7 +26,7 @@ public:
 private:
 
 	//文件头包含的信息
-	int format; 
+	int format;
 	//声道数量
 	int channels;
 	//频率(采样率)
@@ -58,4 +58,3 @@ private:
 	//存放提取的mfcc特征
 	std::vector<std::vector<float>> mfcc_features;
 };
-

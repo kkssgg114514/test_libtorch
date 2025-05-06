@@ -10,4 +10,3 @@ public:
 
 	static void generate_feature_paths(const std::string& root_dir, const std::string& output_file, int speaker_id);
 };
-

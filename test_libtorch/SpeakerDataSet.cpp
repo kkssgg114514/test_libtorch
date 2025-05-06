@@ -74,18 +74,22 @@ void SpeakerDataSet::train_speaker_models_3(const std::string& output_dir)
 {
 	// 检查 CUDA 是否可用
 	torch::Device device(torch::kCPU);
-	if (!torch::cuda::is_available()) {
+	if (!torch::cuda::is_available())
+	{
 		std::cout << "CUDA is not available, using CPU instead." << std::endl;
 		device = torch::Device(torch::kCPU);
 	}
 	// 确保输出目录存在
 	namespace fs = std::filesystem;
-	if (!fs::exists(output_dir)) {
-		try {
+	if (!fs::exists(output_dir))
+	{
+		try
+		{
 			fs::create_directories(output_dir);
 			std::cout << "Created output directory: " << output_dir << std::endl;
 		}
-		catch (const fs::filesystem_error& e) {
+		catch (const fs::filesystem_error& e)
+		{
 			std::cerr << "Error creating directory: " << e.what() << std::endl;
 			std::cerr << "Cannot proceed without valid output directory" << std::endl;
 			return;
@@ -121,7 +125,7 @@ void SpeakerDataSet::train_speaker_models_3(const std::string& output_dir)
 	// 优化器
 	torch::optim::Adam optimizer(
 		model->parameters(),
-		torch::optim::AdamOptions(0.001) // 学习率
+		torch::optim::AdamOptions(0.01) // 学习率
 	);
 
 	// 损失函数
@@ -132,16 +136,19 @@ void SpeakerDataSet::train_speaker_models_3(const std::string& output_dir)
 	int batch_size = 8;
 
 	// 开始训练
-	for (int epoch = 0; epoch < epochs; ++epoch) {
+	for (int epoch = 0; epoch < epochs; ++epoch)
+	{
 		model->train();
 		float total_loss = 0.0;
 
 		// 遍历每个说话人的特征
-		for (const auto& [speaker_id, features] : speaker_features) {
+		for (const auto& [speaker_id, features] : speaker_features)
+		{
 			std::vector<torch::Tensor> embeddings;
 
 			// 分批次训练
-			for (size_t batch_start = 0; batch_start < features.size(); batch_start += batch_size) {
+			for (size_t batch_start = 0; batch_start < features.size(); batch_start += batch_size)
+			{
 				// 准备批次数据
 				std::vector<torch::Tensor> batch_features(
 					features.begin() + batch_start,
@@ -149,15 +156,18 @@ void SpeakerDataSet::train_speaker_models_3(const std::string& output_dir)
 				);
 
 				// 将批次数据移动到 GPU 上
-				for (auto& feat : batch_features) {
-					if (feat.device() != device) {
+				for (auto& feat : batch_features)
+				{
+					if (feat.device() != device)
+					{
 						feat = feat.to(device);
 					}
 				}
 
 				// 前向传播
 				std::vector<torch::Tensor> batch_embeddings;
-				for (auto& feat : batch_features) {
+				for (auto& feat : batch_features)
+				{
 					auto input = feat.unsqueeze(0).expand({ 2, -1, -1 }).to(device);
 					auto emb = model->forward(input).to(device);
 					batch_embeddings.push_back(emb);
@@ -165,7 +175,8 @@ void SpeakerDataSet::train_speaker_models_3(const std::string& output_dir)
 				}
 
 				// 如果批次中只有一个样本，跳过
-				if (batch_embeddings.size() <= 1) {
+				if (batch_embeddings.size() <= 1)
+				{
 					continue;
 				}
 
@@ -199,11 +210,13 @@ void SpeakerDataSet::train_speaker_models_3(const std::string& output_dir)
 	model->eval();
 
 	// 为每个说话人生成参考嵌入
-	for (const auto& [speaker_id, features] : speaker_features) {
+	for (const auto& [speaker_id, features] : speaker_features)
+	{
 		std::vector<torch::Tensor> embeddings;
 
 		// 生成嵌入
-		for (const auto& feature : features) {
+		for (const auto& feature : features)
+		{
 			auto input = feature.unsqueeze(0).expand({ 2, -1, -1 }).to(device);
 			auto emb = model->forward(input).to(device);
 			emb = torch::nn::functional::normalize(emb, torch::nn::functional::NormalizeFuncOptions().p(2.0).dim(1));
@@ -233,22 +246,25 @@ int SpeakerDataSet::test_speaker_models_3(const std::string& test_path)
 
 void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 {
-
 	// 检查 CUDA 是否可用
 	torch::Device device(torch::kCPU);
-	if (!torch::cuda::is_available()) {
+	if (!torch::cuda::is_available())
+	{
 		std::cout << "CUDA is not available, using CPU instead." << std::endl;
 		device = torch::Device(torch::kCPU);
 	}
 
 	// 确保输出目录存在
 	namespace fs = std::filesystem;
-	if (!fs::exists(output_dir)) {
-		try {
+	if (!fs::exists(output_dir))
+	{
+		try
+		{
 			fs::create_directories(output_dir);
 			std::cout << "Created output directory: " << output_dir << std::endl;
 		}
-		catch (const fs::filesystem_error& e) {
+		catch (const fs::filesystem_error& e)
+		{
 			std::cerr << "Error creating directory: " << e.what() << std::endl;
 			std::cerr << "Cannot proceed without valid output directory" << std::endl;
 			return;
@@ -310,7 +326,7 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 			// 输出当前学习率
 			float lr = optimizer.param_groups()[0].options().get_lr();
 			std::cout << "Speaker " << speaker_id << ", Epoch " << epoch << ", Learning Rate: " << lr << std::endl;
-			
+
 			// 分批次训练
 			for (size_t batch_start = 0; batch_start < features.size(); batch_start += batch_size)
 			{
@@ -339,7 +355,8 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 					all_embeddings.push_back(emb);
 				}
 
-				if (embeddings.size() <= 1) {
+				if (embeddings.size() <= 1)
+				{
 					continue; // 跳过只有一个样本的批次
 				}
 
@@ -387,7 +404,6 @@ void SpeakerDataSet::train_speaker_models(const std::string& output_dir)
 			{
 				std::cout << "Speaker " << p_speaker_id << ", Epoch " << epoch << ", Avg Loss: " << lossAvg << std::endl;
 			}
-			
 		}
 
 		// 计算平均嵌入作为参考
@@ -407,19 +423,23 @@ void SpeakerDataSet::train_speaker_models_2(const std::string& output_dir)
 {
 	// 检查 CUDA 是否可用
 	torch::Device device(torch::kCPU);
-	if (!torch::cuda::is_available()) {
+	if (!torch::cuda::is_available())
+	{
 		std::cout << "CUDA is not available, using CPU instead." << std::endl;
 		device = torch::Device(torch::kCPU);
 	}
 
 	// 确保输出目录存在
 	namespace fs = std::filesystem;
-	if (!fs::exists(output_dir)) {
-		try {
+	if (!fs::exists(output_dir))
+	{
+		try
+		{
 			fs::create_directories(output_dir);
 			std::cout << "Created output directory: " << output_dir << std::endl;
 		}
-		catch (const fs::filesystem_error& e) {
+		catch (const fs::filesystem_error& e)
+		{
 			std::cerr << "Error creating directory: " << e.what() << std::endl;
 			std::cerr << "Cannot proceed without valid output directory" << std::endl;
 			return;
@@ -431,8 +451,6 @@ void SpeakerDataSet::train_speaker_models_2(const std::string& output_dir)
 
 	int preid = 0;
 	int k = 0;
-
-
 
 	for (size_t i = 0; i < feature_paths.size(); ++i)
 	{
@@ -470,7 +488,8 @@ void SpeakerDataSet::train_speaker_models_2(const std::string& output_dir)
 	int batch_size = 8;
 
 	float total_loss = 0.0;
-	for (int epoch = 0; epoch < epochs; ++epoch) {
+	for (int epoch = 0; epoch < epochs; ++epoch)
+	{
 		model->train();
 		float total_loss = 0.0;
 		// 为每个说话人生成平均向量
@@ -500,10 +519,10 @@ void SpeakerDataSet::train_speaker_models_2(const std::string& output_dir)
 	// 保存每个说话人的参考嵌入
 	model->eval(); // 切换到评估模式
 
-	for (const auto& [speaker_id, features] : speaker_features) 
+	for (const auto& [speaker_id, features] : speaker_features)
 	{
 		std::vector<torch::Tensor> embeddings;
-		for (const auto& feature : features) 
+		for (const auto& feature : features)
 		{
 			auto input = feature.unsqueeze(0).expand({ 2, -1, -1 }).to(device);
 			auto emb = model->forward(input).to(device);
@@ -529,26 +548,28 @@ int SpeakerDataSet::test_speaker_models(const std::string& model_dir, const std:
 {
 	// 检查 CUDA 是否可用
 	torch::Device device(torch::kCPU);
-	if (!torch::cuda::is_available()) {
+	if (!torch::cuda::is_available())
+	{
 		std::cout << "CUDA is not available, using CPU instead." << std::endl;
 		device = torch::Device(torch::kCPU);
 	}
 
 	// 加载测试特征
 	SpeakerSample test_sample = loadFeatureFile(test_path, 0);
-	
+
 	test_sample.features = normalize_feature(test_sample.features);
 	test_sample.features = test_sample.features.to(device);
 	//std::cout << test_sample.features << std::endl;
 	// 遍历模型目录，加载所有模型和对应的参考嵌入
 	std::vector<std::pair<int, float>> similarities;
 
-	for (const auto& entry : std::filesystem::directory_iterator(model_dir)) 
+	for (const auto& entry : std::filesystem::directory_iterator(model_dir))
 	{
 		std::string file_path = entry.path().string();
 
 		// 只处理模型文件
-		if (file_path.find("_model.pt") == std::string::npos) {
+		if (file_path.find("_model.pt") == std::string::npos)
+		{
 			continue;
 		}
 
@@ -559,13 +580,15 @@ int SpeakerDataSet::test_speaker_models(const std::string& model_dir, const std:
 		std::string embedding_path = model_dir + "/speaker_" + std::to_string(speaker_id) + "_embedding.pt";
 
 		// 确认嵌入文件存在
-		if (!std::filesystem::exists(embedding_path)) {
+		if (!std::filesystem::exists(embedding_path))
+		{
 			std::cerr << "Warning: Reference embedding not found for speaker " << speaker_id << std::endl;
 			continue;
 		}
 
-		try {
-			// 加载特定说话人的模型
+		try
+		{
+	   // 加载特定说话人的模型
 			auto speaker_model = std::make_shared<ECAPA_TDNN>();
 			torch::load(speaker_model, model_path);
 			speaker_model->to(device);
@@ -593,14 +616,16 @@ int SpeakerDataSet::test_speaker_models(const std::string& model_dir, const std:
 			similarities.emplace_back(speaker_id, similarity);
 			std::cout << "Speaker " << speaker_id << " similarity: " << similarity << std::endl;
 		}
-		catch (const std::exception& e) {
+		catch (const std::exception& e)
+		{
 			std::cerr << "Error processing speaker " << speaker_id << ": " << e.what() << std::endl;
 			continue;
 		}
 	}
 
 	// 找到最相似的说话人
-	if (similarities.empty()) {
+	if (similarities.empty())
+	{
 		std::cerr << "No valid similarities calculated!" << std::endl;
 		return -1;
 	}
@@ -608,7 +633,10 @@ int SpeakerDataSet::test_speaker_models(const std::string& model_dir, const std:
 	auto max_similarity = std::max_element(
 		similarities.begin(),
 		similarities.end(),
-		[](const auto& a, const auto& b) { return a.second < b.second; }
+		[] (const auto& a, const auto& b)
+		{
+			return a.second < b.second;
+		}
 	);
 
 	std::cout << "Best match: Speaker " << max_similarity->first
@@ -621,7 +649,8 @@ int SpeakerDataSet::test_speaker_models_2(const std::string& model_dir, const st
 {
 	// 检查 CUDA 是否可用
 	torch::Device device(torch::kCPU);
-	if (!torch::cuda::is_available()) {
+	if (!torch::cuda::is_available())
+	{
 		std::cout << "CUDA is not available, using CPU instead." << std::endl;
 		device = torch::Device(torch::kCPU);
 	}
@@ -642,7 +671,7 @@ int SpeakerDataSet::test_speaker_models_2(const std::string& model_dir, const st
 	torch::Tensor test_embedding = model->forward(input).to(device);
 
 	test_embedding = torch::nn::functional::normalize(test_embedding,
-		torch::nn::functional::NormalizeFuncOptions().p(2.0).dim(1));
+													  torch::nn::functional::NormalizeFuncOptions().p(2.0).dim(1));
 
 	std::vector<std::pair<int, float>> similarities;
 	for (const auto& entry : std::filesystem::directory_iterator(model_dir))
@@ -650,7 +679,8 @@ int SpeakerDataSet::test_speaker_models_2(const std::string& model_dir, const st
 		std::string file_path = entry.path().string();
 
 		// 只处理嵌入文件
-		if (file_path.find("_embedding.pt") == std::string::npos) {
+		if (file_path.find("_embedding.pt") == std::string::npos)
+		{
 			continue;
 		}
 
@@ -671,7 +701,8 @@ int SpeakerDataSet::test_speaker_models_2(const std::string& model_dir, const st
 		std::cout << "Speaker " << speaker_id << " similarity: " << similarity << std::endl;
 	}
 	// 找到最相似的说话人
-	if (similarities.empty()) {
+	if (similarities.empty())
+	{
 		std::cerr << "No valid similarities calculated!" << std::endl;
 		return -1;
 	}
@@ -679,7 +710,10 @@ int SpeakerDataSet::test_speaker_models_2(const std::string& model_dir, const st
 	auto max_similarity = std::max_element(
 		similarities.begin(),
 		similarities.end(),
-		[](const auto& a, const auto& b) { return a.second < b.second; }
+		[] (const auto& a, const auto& b)
+		{
+			return a.second < b.second;
+		}
 	);
 
 	std::cout << "Best match: Speaker " << max_similarity->first
@@ -715,9 +749,9 @@ torch::Tensor SpeakerDataSet::vectorToTensor(std::vector<std::vector<float>> fea
 
 	// 创建一个Tensor内存区域
 	torch::Tensor tensor = torch::zeros({ static_cast<long>(rows), static_cast<long>(cols) },
-		torch::TensorOptions().dtype(torch::kFloat32));
+										torch::TensorOptions().dtype(torch::kFloat32));
 
-	// 复制数据
+									// 复制数据
 	for (size_t i = 0; i < rows; i++)
 	{
 		for (size_t j = 0; j < cols; j++)
@@ -763,22 +797,27 @@ std::vector<torch::Tensor> SpeakerDataSet::sample_negatives(const std::unordered
 int SpeakerDataSet::extract_speaker_id_from_path(const std::string& model_path)
 {
 	size_t firstUnderscore = model_path.find('_');
-	if (firstUnderscore == std::string::npos) {
+	if (firstUnderscore == std::string::npos)
+	{
 		return -1; // 没找到第一个下划线
 	}
 	size_t secondUnderscore = model_path.find('_', firstUnderscore + 1);
-	if (secondUnderscore == std::string::npos) {
+	if (secondUnderscore == std::string::npos)
+	{
 		return -1; // 没找到第二个下划线
 	}
 	std::string numberStr = model_path.substr(firstUnderscore + 1, secondUnderscore - firstUnderscore - 1);
-	try {
+	try
+	{
 		return std::stoi(numberStr);
 	}
-	catch (const std::invalid_argument& e) {
+	catch (const std::invalid_argument& e)
+	{
 		std::cerr << "转换数字时出错: " << e.what() << std::endl;
 		return -1;
 	}
-	catch (const std::out_of_range& e) {
+	catch (const std::out_of_range& e)
+	{
 		std::cerr << "数字超出范围: " << e.what() << std::endl;
 		return -1;
 	}
@@ -800,14 +839,16 @@ void SpeakerDataSet::save_audio_to_directory(const std::string& wavDir)
 	namespace fs = std::filesystem;
 
 	// 检查目标目录是否存在
-	if (!fs::exists(wavDir) || !fs::is_directory(wavDir)) {
+	if (!fs::exists(wavDir) || !fs::is_directory(wavDir))
+	{
 		std::cerr << "Error: Directory does not exist or is not valid: " << wavDir << std::endl;
 		return;
 	}
 
 	// 输出文件路径，用于保存子目录路径和对应的 ID
 	std::ofstream outfile(output_file);
-	if (!outfile.is_open()) {
+	if (!outfile.is_open())
+	{
 		std::cerr << "Error: Unable to create output file: " << output_file << std::endl;
 		return;
 	}
@@ -815,9 +856,11 @@ void SpeakerDataSet::save_audio_to_directory(const std::string& wavDir)
 	int speaker_id = 1; // 从 1 开始的说话人 ID
 
 	// 遍历目标目录的子文件夹
-	for (const auto& entry : fs::directory_iterator(wavDir)) {
-		if (fs::is_directory(entry)) {
-			// 获取子目录路径
+	for (const auto& entry : fs::directory_iterator(wavDir))
+	{
+		if (fs::is_directory(entry))
+		{
+// 获取子目录路径
 			std::string folder_path = entry.path().string();
 
 			// 将子目录路径和对应的 ID 写入文件
@@ -837,14 +880,16 @@ void SpeakerDataSet::load_wav_index()
 {
 	//读取音频文件路径和对应的说话人ID
 	std::ifstream infile(output_file);
-	if (!infile.is_open()) {
+	if (!infile.is_open())
+	{
 		std::cerr << "Error: Unable to open input file: " << output_file << std::endl;
 		return;
 	}
 	std::string audio_path;
 	int speaker_id;
-	while (infile >> audio_path >> speaker_id) {
-		//路径和id一一对应
+	while (infile >> audio_path >> speaker_id)
+	{
+//路径和id一一对应
 		speaker_ids.push_back(speaker_id);
 		wav_paths.push_back(audio_path);
 	}

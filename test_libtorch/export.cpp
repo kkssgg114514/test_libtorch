@@ -21,7 +21,6 @@ void trainModel(std::string wavDir, int index)
 	std::string model_dir = "..\\modelDir";
 	//ÑµÁ·Ä£ÐÍ
 	speaker_train.train_speaker_models(model_dir);
-
 }
 
 void trainModel2(std::string wavDir)

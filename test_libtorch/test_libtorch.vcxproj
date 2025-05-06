@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)..\..\dependency\libtorch\include\torch\csrc\api\include;$(SolutionDir)..\..\dependency\libtorch\include;$(SolutionDir)..\..\dependency\LibrosaCpp-main;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\..\dependency\libtorch\lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\include;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(REPOS)libtorch\include\torch\csrc\api\include;$(REPOS)libtorch\include;$(REPOS)LibrosaCpp-main;$(IncludePath)</IncludePath>
+    <LibraryPath>$(REPOS)libtorch\lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\include;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

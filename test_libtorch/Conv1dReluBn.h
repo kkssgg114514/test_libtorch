@@ -13,4 +13,3 @@ private:
 	torch::nn::Conv1d conv { nullptr };
 	torch::nn::BatchNorm1d bn { nullptr };
 };
-
