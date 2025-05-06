@@ -73,7 +73,7 @@ void SpeakerDataSet::load_feature_paths(const std::string& path_file)
 void SpeakerDataSet::train_speaker_models_3(const std::string& output_dir)
 {
 	// 检查 CUDA 是否可用
-	torch::Device device(torch::kCPU);
+	torch::Device device(torch::kCUDA);
 	if (!torch::cuda::is_available())
 	{
 		std::cout << "CUDA is not available, using CPU instead." << std::endl;
@@ -130,6 +130,7 @@ void SpeakerDataSet::train_speaker_models_3(const std::string& output_dir)
 
 	// 损失函数
 	torch::nn::MSELoss mse_loss;
+	torch::nn::CrossEntropyLoss cross_entropy_loss;
 
 	// 训练参数
 	int epochs = 15;
@@ -192,7 +193,8 @@ void SpeakerDataSet::train_speaker_models_3(const std::string& output_dir)
 				// 计算损失
 				optimizer.zero_grad();
 				torch::Tensor expanded_anchor = anchor.expand_as(target).to(device);
-				torch::Tensor loss = mse_loss(expanded_anchor, target).to(device);
+				//torch::Tensor loss = mse_loss(expanded_anchor, target).to(device);
+				torch::Tensor loss = cross_entropy_loss(expanded_anchor, target).to(device);
 
 				// 反向传播和优化
 				loss.backward();
@@ -200,9 +202,10 @@ void SpeakerDataSet::train_speaker_models_3(const std::string& output_dir)
 
 				total_loss += loss.item<float>();
 			}
-
+			//std::cout << std::scientific;
+			//std::cout << std::setprecision(std::numeric_limits<double>::digits10 + 1);
 			std::cout << "Speaker ID: " << speaker_id << ", Epoch: " << epoch + 1
-				<< ", Loss: " << total_loss / features.size() << std::endl;
+				<< ", Loss: " << float(total_loss / features.size()) << std::endl;
 		}
 	}
 
@@ -648,7 +651,7 @@ int SpeakerDataSet::test_speaker_models(const std::string& model_dir, const std:
 int SpeakerDataSet::test_speaker_models_2(const std::string& model_dir, const std::string& test_path)
 {
 	// 检查 CUDA 是否可用
-	torch::Device device(torch::kCPU);
+	torch::Device device(torch::kCUDA);
 	if (!torch::cuda::is_available())
 	{
 		std::cout << "CUDA is not available, using CPU instead." << std::endl;

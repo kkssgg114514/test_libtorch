@@ -258,8 +258,8 @@ int main()
 	//std::string test5 = "D:\\private\\fd\\testnew\\testDir\\test4\\BAC009S0132W0210.wav"; //4vx
 	//std::string test6 = "D:\\private\\fd\\testnew\\testDir\\test1\\BAC0001.wav"; //1vv
 
-	std::string test11 = "D:\\code\\fdHelp\\testnew\\testDir\\test1\\BAC0001.wav"; //1vv
-	std::string test12 = "D:\\code\\fdHelp\\testnew\\testDir\\test2\\BAC009S0008W0184.wav"; //2vv
+	std::string test11 = "D:\\code\\fdHelp\\testnew\\testDir\\test1\\BAC0001.wav"; //1vvv
+	std::string test12 = "D:\\code\\fdHelp\\testnew\\testDir\\test2\\BAC009S0008W0184.wav"; //2vvv
 
 	int user = testModel(test12);
 
