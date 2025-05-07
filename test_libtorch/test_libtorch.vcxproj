@@ -148,7 +148,6 @@
     <ClCompile Include="SE_Res2Block.cpp" />
     <ClCompile Include="SpeakerDataSet.cpp" />
     <ClCompile Include="SpeakerVerificationLoss.cpp" />
-    <ClCompile Include="test.cpp" />
     <ClCompile Include="VPT_Mfcc.cpp" />
     <ClCompile Include="wavreader.c" />
   </ItemGroup>

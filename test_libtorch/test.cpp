@@ -267,7 +267,7 @@ int main()
 
 	//std::string trainDir = "D:\\code\\fdHelp\\testnew\\trainDir";
 
-	std::string test1 = "D:\\private\\fd\\testnew\\testDir\\test1\\BAC009S0002W0379.wav";
+	/*std::string test1 = "D:\\private\\fd\\testnew\\testDir\\test1\\BAC009S0002W0379.wav";
 	std::string test2 = "D:\\private\\fd\\testnew\\testDir\\test1\\BAC009S0002W0383.wav";
 	std::string test3 = "D:\\private\\fd\\testnew\\testDir\\test6\\BAC009S0106W0463.wav";
 	std::string test4 = "D:\\private\\fd\\testnew\\testDir\\test3\\BAC009S0089W0171.wav";
@@ -278,11 +278,11 @@ int main()
 	std::string test9 = "D:\\private\\fd\\testnew\\testDir\\test6\\BAC009S0106W0461.wav";
 	std::string test10 = "D:\\private\\fd\\testnew\\testDir\\test3\\BAC009S0089W0168.wav";
 
-	testModel(test10);
+	testModel(test10);*/
 
-	/*std::string trainDir = "D:\\private\\fd\\testnew\\trainDir";
+	std::string trainDir = "D:\\private\\fd\\testnew\\trainDir";
 
-	trainModel2(trainDir);*/
+	trainModel2(trainDir);
 
 	return 0;
 }

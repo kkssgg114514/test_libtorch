@@ -7,6 +7,7 @@
 #include <random>
 #include <filesystem>
 #include "Filesearch.h"
+#include <chrono>
 
 void SpeakerDataSet::processBatchMfccFeatures(const std::string& input_dir, const std::string& output_dir)
 {
@@ -139,6 +140,9 @@ void SpeakerDataSet::train_speaker_models_3(const std::string& output_dir)
 	// 开始训练
 	for (int epoch = 0; epoch < epochs; ++epoch)
 	{
+		// 开始计时
+		auto start_time = std::chrono::high_resolution_clock::now();
+
 		model->train();
 		float total_loss = 0.0;
 
@@ -207,6 +211,11 @@ void SpeakerDataSet::train_speaker_models_3(const std::string& output_dir)
 			std::cout << "Speaker ID: " << speaker_id << ", Epoch: " << epoch + 1
 				<< ", Loss: " << float(total_loss / features.size()) << std::endl;
 		}
+		// 结束计时
+		auto end_time = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> epoch_duration = end_time - start_time;
+		// 输出每个 epoch 的耗时
+		std::cout << "Epoch " << epoch + 1 << " completed in " << epoch_duration.count() << " seconds." << std::endl;
 	}
 
 	// 切换到评估模式

@@ -45,9 +45,6 @@
     <ClCompile Include="librosatest.cpp">
       <Filter>源文件\tests</Filter>
     </ClCompile>
-    <ClCompile Include="test.cpp">
-      <Filter>源文件\tests</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
