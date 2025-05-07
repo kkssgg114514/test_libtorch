@@ -39,7 +39,7 @@ torch::Tensor ECAPA_TDNN::forward(torch::Tensor x)
 	auto out = torch::cat({ out2, out3, out4 }, 1);
 	//std::cout << out.sizes() << std::endl;
 	out = torch::relu(conv->forward(out));
-	//大概率输入维度不符合要求,理应符合要求?(已修复)
+	//大概率输入维度不符合要求,理应符合要求(已修复)
 	out = bn1->forward(pooling->forward(out));
 	out = bn2->forward(linear->forward(out));
 	return out;

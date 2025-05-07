@@ -118,7 +118,7 @@ void SpeakerDataSet::train_speaker_models_3(const std::string& output_dir)
 		speaker_features[f_speaker_ids[i]].push_back(feature.features);
 	}
 
-	// 创建共享模型
+	// 创建模型
 	auto model = std::make_shared<ECAPA_TDNN>();
 	model->to(device); // 将模型移动到 GPU 上
 

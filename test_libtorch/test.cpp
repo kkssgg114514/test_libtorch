@@ -251,21 +251,37 @@ int main()
 	//trainModel(train3, 3);
 	//trainModel(train4, 4);
 
-	//std::string test1 = "D:\\private\\fd\\testnew\\testDir\\test2\\BAC009S0008W0185.wav"; //2xx
-	//std::string test2 = "D:\\private\\fd\\testnew\\testDir\\test3\\BAC009S0089W0175.wav"; //3vv
-	//std::string test3 = "D:\\private\\fd\\testnew\\testDir\\test1\\BAC009S0002W0383.wav"; //1vv
-	//std::string test4 = "D:\\private\\fd\\testnew\\testDir\\test3\\BAC009S0089W0173.wav"; //3xx
-	//std::string test5 = "D:\\private\\fd\\testnew\\testDir\\test4\\BAC009S0132W0210.wav"; //4vx
-	//std::string test6 = "D:\\private\\fd\\testnew\\testDir\\test1\\BAC0001.wav"; //1vv
+	//std::string test1 = "D:\\private\\fd\\testnew\\testDir\\test2\\BAC009S0008W0185.wav"; //2xxv
+	//std::string test2 = "D:\\private\\fd\\testnew\\testDir\\test3\\BAC009S0089W0175.wav"; //3vvv
+	//std::string test3 = "D:\\private\\fd\\testnew\\testDir\\test1\\BAC009S0002W0383.wav"; //1vvv
+	//std::string test4 = "D:\\private\\fd\\testnew\\testDir\\test3\\BAC009S0089W0173.wav"; //3xxv
+	//std::string test5 = "D:\\private\\fd\\testnew\\testDir\\test4\\BAC009S0132W0210.wav"; //4vxx
+	//std::string test6 = "D:\\private\\fd\\testnew\\testDir\\test1\\BAC0001.wav"; //1vvv
 
-	std::string test11 = "D:\\code\\fdHelp\\testnew\\testDir\\test1\\BAC0001.wav"; //1vvv
-	std::string test12 = "D:\\code\\fdHelp\\testnew\\testDir\\test2\\BAC009S0008W0184.wav"; //2vvv
+	//std::string test11 = "D:\\code\\fdHelp\\testnew\\testDir\\test1\\BAC0001.wav"; //1vvv
+	//std::string test12 = "D:\\code\\fdHelp\\testnew\\testDir\\test2\\BAC009S0008W0184.wav"; //2vvv
 
-	int user = testModel(test12);
+	//int user = testModel(test6);
 
-	std::cout << user << std::endl;
+	//std::cout << user << std::endl;
 
-	/*std::string trainDir = "D:\\code\\fdHelp\\testnew\\trainDir";
+	//std::string trainDir = "D:\\code\\fdHelp\\testnew\\trainDir";
+
+	std::string test1 = "D:\\private\\fd\\testnew\\testDir\\test1\\BAC009S0002W0379.wav";
+	std::string test2 = "D:\\private\\fd\\testnew\\testDir\\test1\\BAC009S0002W0383.wav";
+	std::string test3 = "D:\\private\\fd\\testnew\\testDir\\test6\\BAC009S0106W0463.wav";
+	std::string test4 = "D:\\private\\fd\\testnew\\testDir\\test3\\BAC009S0089W0171.wav";
+	std::string test5 = "D:\\private\\fd\\testnew\\testDir\\test4\\BAC009S0132W0210.wav";
+	std::string test6 = "D:\\private\\fd\\testnew\\testDir\\test7\\BAC009S0157W0353.wav";
+	std::string test7 = "D:\\private\\fd\\testnew\\testDir\\test2\\BAC009S0008W0187.wav";
+	std::string test8 = "D:\\private\\fd\\testnew\\testDir\\test5\\BAC009S0069W0311.wav";
+	std::string test9 = "D:\\private\\fd\\testnew\\testDir\\test6\\BAC009S0106W0461.wav";
+	std::string test10 = "D:\\private\\fd\\testnew\\testDir\\test3\\BAC009S0089W0168.wav";
+
+	testModel(test10);
+
+	/*std::string trainDir = "D:\\private\\fd\\testnew\\trainDir";
+
 	trainModel2(trainDir);*/
 
 	return 0;
